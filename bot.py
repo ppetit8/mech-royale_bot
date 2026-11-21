@@ -1143,7 +1143,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: b6544ffb444f187c5d6f60e245934358a3ad394c34ff8cf0ae1fc9e629104243
+# Source: strategy.py; SHA-256: 96e2487873ffffe65aa08d0dfcc69dd3c74bb0cc7fa60783ebdab3a3bd0326ca
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1158,7 +1158,7 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-v5-control'
+    name = 'Aegis-v6'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1181,6 +1181,8 @@ class Bot:
         self.heard = []
         self.avoid_goals = []
         self.progress = None
+        self.goal_key = None
+        self.goal_decision = {}
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -1219,11 +1221,23 @@ class Bot:
         return risk
 
     def strategic_goal(self, obs, threats, urgent):
+        """Bounded utility selection, with a conservative opponent-response test.
+
+        Utilities are policy points, not probabilities of winning. Optional goals
+        need a verified direct ground route; mandatory rotations retain the
+        existing navigator's ability to take detours. No combat controls change.
+        """
+        deadline = time.perf_counter() + 0.004
         me = obs['self']
         p = me['pos']
         now = obs['t']
         zone = obs['zone']
-        walk = me['stats']['walk_speed']
+        w = self.world
+        stats = me['stats']
+        body = stats['radius']
+        height = stats['height']
+        walk = max(1, stats['walk_speed'])
+        missing = max(0, 1 - me['hp'] / me['max_hp'])
         center, radius = future_zone(zone, now, now + 20)
         next_c = zone['next_center']
         next_r = zone['next_radius']
@@ -1231,72 +1245,210 @@ class Bot:
         migrate = urgent or dist_next / walk * 1.7 + 12 > zone['shrink_end'] - now
         if migrate:
             center, radius = (next_c, next_r)
-        margin = min(25, radius * 0.2)
-        safe_r = max(0, radius - margin)
-        if migrate or math.dist(p[:2], center) > safe_r:
-            toward = unit([p[0] - center[0], p[1] - center[1]])
-            goal = [center[0] + toward[0] * safe_r * 0.8, center[1] + toward[1] * safe_r * 0.8]
-            self.goal_kind = 'zone'
-            return self.zone_goal(me, center, max(0, radius - me['stats']['radius']), goal)
-        if self.recovering or len(threats) >= 2:
-            candidates = [p[:2]]
-            for distance in (20, 45):
-                for i in range(8):
-                    a = i * math.pi / 4
-                    q = [p[0] + distance * math.cos(a), p[1] + distance * math.sin(a)]
-                    if math.dist(q, center) <= safe_r and self.world.clear_at(*q, self.world.ground(*q), me['stats']['height']) > me['stats']['radius'] + 1:
-                        candidates.append(q)
+        safe_r = max(0, radius - min(25, radius * 0.2))
+        rotating = migrate or math.dist(p[:2], center) > safe_r
+        candidates = []
+        rejected = {}
+        checked = 0
+        exhausted = False
 
-            def score(q):
-                near = sum((max(0, 75 - math.dist(q, e['pos'][:2])) / 20 for e in threats))
-                return self.exposure(q, threats, me['stats']['height']) * 4 + near + math.dist(q, p[:2]) * 0.012
-            goal = min(candidates, key=score)
-            self.goal_kind = 'recover' if self.recovering else 'disengage'
-            return goal
-        best = None
-        held = [w['kind'] for w in me['weapons'] if w]
-        empty = len(held) < 2
-        for obj, seen, kind in self.loot.values():
-            q = obj['pos']
-            d = math.dist(q[:2], p[:2])
-            if any((math.dist(q[:2], blocked) < 12 for blocked in self.avoid_goals)):
+        def add(q, kind, reward, key=None, dwell=0, target=None):
+            candidates.append(dict(q=list(q[:2]), kind=kind, reward=reward, key=key or (kind, round(q[0]), round(q[1])), dwell=dwell, target=target))
+
+        def reject(reason):
+            rejected[reason] = rejected.get(reason, 0) + 1
+        risk_cache = {}
+
+        def risk(q):
+            key = (round(q[0], 1), round(q[1], 1))
+            if key in risk_cache:
+                return risk_cache[key]
+            ordered = sorted(((math.dist(q, e['pos'][:2]), e) for e in threats), key=lambda item: item[0])
+            value = sum((max(0, 80 - d) * 0.28 for d, _ in ordered))
+            top = [*q, w.ground(*q) + height * 0.55]
+            for d, e in ordered[:4]:
+                if d > 230:
+                    continue
+                source = e['pos'][:]
+                source[2] += self.cfg['mech']['muzzle_height']
+                value += (12 if w.shot_clear(source, top) else 2) * min(1.5, 140 / (d + 30))
+            risk_cache[key] = value
+            return value
+        points = [p[:2]]
+        for distance in (22, 42):
+            for i in range(6):
+                a = i * math.tau / 6
+                points.append([p[0] + distance * math.cos(a), p[1] + distance * math.sin(a)])
+        corners = []
+        for idx in w.nearby(*p[:2], 50):
+            prism = w.prisms[idx]
+            if prism['kind'] == 'tree' or prism['top'] < p[2] + height * 0.55:
                 continue
-            if now - seen > 18 or d > 115 or abs(q[2] - self.world.ground(*q[:2])) > 4:
-                continue
-            if math.dist(q[:2], center) > safe_r:
-                continue
-            danger = sum((max(0, 80 - math.dist(q[:2], e['pos'][:2])) / 12 for e in threats))
-            value = 85 if kind == 'cube' else 125 if kind == 'weapon' and empty and (obj['kind'] not in held) else 0
-            if kind == 'crate' and (not threats) and (me['cubes'] < 10):
-                value = 35
-            score = value / (d + 18) - danger
-            if score > 0 and (best is None or score > best[0]):
-                if kind == 'crate':
+            x0, y0, x1, y1 = prism['_bbox']
+            pad = body + 2
+            for x in (x0 - pad, x1 + pad):
+                for y in (y0 - pad, y1 + pad):
+                    if math.dist(p[:2], [x, y]) < 65:
+                        corners.append([x, y])
+        points.extend(sorted(corners, key=lambda q: math.dist(p[:2], q))[:8])
+        if rotating:
+            toward = unit([p[0] - center[0], p[1] - center[1]])
+            preferred = [center[i] + toward[i] * safe_r * 0.8 for i in range(2)]
+            fallback = self.zone_goal(me, center, max(0, radius - body), preferred)
+            add(fallback, 'zone', 0)
+            for q in points[1:]:
+                if math.dist(q, center) <= safe_r:
+                    add(q, 'zone', 0)
+        else:
+            local_danger = any((math.dist(p[:2], e['pos'][:2]) < 120 for e in threats))
+            cover_kind = 'recover' if self.recovering else 'disengage' if local_danger else 'hold'
+            cover_reward = 12 + missing * 18 if self.recovering else 5 if local_danger else 0
+            fallback = p[:2]
+            add(p, cover_kind, cover_reward)
+
+            def cube_value(count):
+                cap = self.cfg['cubes']['stat_cap']
+                stats_gain = max(0, min(count, cap - me['cubes']))
+                offers = sum((me['cubes'] < n <= me['cubes'] + count for n in self.cfg['cubes']['upgrade_thresholds']))
+                return stats_gain * 15 + offers * 8 + (count - stats_gain) * 2
+            enemy_speed = self.cfg['mech']['boost_speed']
+            for upgrade in self.cfg.get('upgrades', []):
+                for effect in upgrade['effects']:
+                    if effect['path'] == 'mech.boost_speed':
+                        enemy_speed *= max(1, effect.get('mul', 1)) ** upgrade['max']
+                        enemy_speed += max(0, effect.get('add', 0)) * upgrade['max']
+            enemy_speed = max([1, enemy_speed] + [math.hypot(*e['vel'][:2]) for e in threats])
+            for drop in sorted(obs.get('drops', []), key=lambda d: math.dist(p[:2], d['pos'][:2])):
+                q = drop['pos']
+                d = math.dist(p[:2], q[:2])
+                if d > 115 or abs(q[2] - w.ground(*q[:2])) > 4:
+                    reject('drop_range_or_height')
+                    continue
+                ours = drop['holder'] == me['id'] and d < drop['radius'] and (abs(p[2] - q[2]) <= 4)
+                dwell = max(0, drop['lands_in'] - d / walk) + max(0, drop['capture_s'] - (drop['progress'] if ours else 0))
+                completion = d / walk + dwell
+                contested = any((max(0, math.dist(q[:2], e['pos'][:2]) - drop['radius']) / enemy_speed <= completion + 2 for e in threats))
+                if contested or drop['holder'] not in (None, me['id']) or completion > 18:
+                    reject('drop_contest_or_wait')
+                    continue
+                delay = max(0, stats['regen_delay'] - (now - self.last_damage))
+                passive_heal = stats['regen_per_s'] * max(0, completion - delay)
+                repair = max(0, me['max_hp'] - me['hp'] - passive_heal) / me['max_hp'] * 85
+                value = cube_value(self.cfg['drops']['cubes']) + repair + (me['max_energy'] - me['energy']) * 0.1
+                add(q, 'drop', value, ('drop', drop['id']), dwell, drop)
+            if self.goal is not None and now < self.goal_until and (self.goal_kind in (cover_kind, 'explore')) and (self.goal_kind != 'explore' or (not self.recovering and (not local_danger))):
+                add(self.goal, self.goal_kind, 11 if self.goal_kind == 'explore' else cover_reward, self.goal_key)
+            cover_points = []
+            if self.recovering or local_danger:
+                for group in (points[13:], points[1:13]):
+                    valid = [q for q in group if w.clear_at(*q, w.ground(*q), height, body + 0.5) >= body + 0.4]
+                    cover_points.extend(sorted(valid, key=lambda q: sum((max(0, 80 - math.dist(q, e['pos'][:2])) for e in threats)) + math.dist(p[:2], q) * 0.3)[:4])
+                for q in cover_points[:4]:
+                    add(q, cover_kind, cover_reward)
+            held = [weapon['kind'] for weapon in me['weapons'] if weapon]
+            loot_candidates = []
+            for obj, seen, kind in self.loot.values():
+                q = obj['pos']
+                d = math.dist(q[:2], p[:2])
+                if now - seen > 18 or d > 115 or abs(q[2] - w.ground(*q[:2])) > 4:
+                    continue
+                if kind in ('cube', 'weapon') and any((max(0, math.dist(q[:2], e['pos'][:2]) - 4) / enemy_speed <= d / walk + 1 for e in threats)):
+                    reject('loot_contest')
+                    continue
+                value = cube_value(1) if kind == 'cube' else 28 if kind == 'weapon' and len(held) < 2 and (obj['kind'] not in held) else 0
+                dwell = 0
+                if kind == 'crate' and (not threats) and (not self.recovering) and (me['cubes'] < 10):
+                    value = 12
+                    gun = next((weapon for weapon in me['weapons'] if weapon and weapon['kind'] == 'gun'), None)
+                    if not gun:
+                        continue
+                    dwell = self.cfg['crates']['hp'] / max(1, gun['stats']['damage']) * gun['stats']['cooldown'] + gun['stats']['reload']
                     away = unit([p[0] - q[0], p[1] - q[1]])
                     q = [q[0] + away[0] * 18, q[1] + away[1] * 18]
-                best = (score, q[:2], kind)
-        for drop in obs.get('drops', []):
-            q = drop['pos']
-            d = math.dist(q[:2], p[:2])
-            if d < 100 and drop['lands_in'] < d / walk + 5 and (math.dist(q[:2], center) < safe_r):
-                if all((math.dist(e['pos'][:2], q[:2]) > 100 for e in threats)):
-                    score = (200 if me['hp'] < me['max_hp'] * 0.8 else 100) / (d + 20)
-                    if best is None or score > best[0]:
-                        best = (score, q[:2], 'drop')
-        if best:
-            self.goal_kind = best[2]
-            return best[1]
-        if self.goal is not None and now < self.goal_until and (math.dist(p[:2], self.goal) > 6) and (math.dist(self.goal, center) <= safe_r):
-            return self.goal
-        for _ in range(12):
-            angle = self.rng.uniform(-math.pi, math.pi)
-            q = [p[0] + 65 * math.cos(angle), p[1] + 65 * math.sin(angle)]
-            if math.dist(q, center) <= safe_r and self.world.nearest(q, me['stats']['radius']) is not None and all((math.dist(q, blocked) >= 12 for blocked in self.avoid_goals)):
-                self.goal_kind = 'explore'
-                self.goal_until = now + 10
-                return q
-        self.goal_kind = 'hold'
-        return center[:]
+                if value:
+                    loot_candidates.append((value / (1 + d / walk / 10), obj['id'], q, kind, value, dwell, obj))
+            for _, ident, q, kind, value, dwell, obj in sorted(loot_candidates, reverse=True)[:6]:
+                add(q, kind, value, (kind, ident), dwell, obj)
+            if self.recovering or local_danger:
+                for q in cover_points[4:]:
+                    add(q, cover_kind, cover_reward)
+            else:
+                for _ in range(6):
+                    a = self.rng.uniform(-math.pi, math.pi)
+                    add([p[0] + 65 * math.cos(a), p[1] + 65 * math.sin(a)], 'explore', 11)
+        scored = []
+        start_node = w.nearest(p, body)
+        for candidate in candidates[:32]:
+            if checked and time.perf_counter() >= deadline:
+                exhausted = True
+                break
+            checked += 1
+            q = candidate['q']
+            kind = candidate['kind']
+            distance = math.dist(p[:2], q)
+            ground = w.ground(*q)
+            if w.clear_at(*q, ground, height, body + 0.5) < body + 0.4:
+                reject('blocked')
+                continue
+            node = w.node(q)
+            if start_node is not None and w.components[node] != w.components[start_node]:
+                reject('disconnected')
+                continue
+            if kind != 'zone' and any((math.dist(q, blocked) < 12 for blocked in self.avoid_goals)):
+                reject('failed_route')
+                continue
+            completion = distance / walk + candidate['dwell']
+            c, r = future_zone(zone, now, now + max(20, completion + 6))
+            if kind != 'zone':
+                if math.dist(q, c) > max(0, r - min(12, r * 0.12)):
+                    reject('zone_at_completion')
+                    continue
+                exit_distance = max(0, math.dist(q, next_c) - max(0, next_r - 12))
+                if exit_distance > 0 and completion + exit_distance / walk * 1.7 + 6 > zone['shrink_end'] - now:
+                    reject('rotation_slack')
+                    continue
+                if distance > 1 and (not w.walk_clear(p, [*q, ground], body, height, abs(p[2] - w.ground(*p[:2])) < 2)):
+                    reject('unverified_route')
+                    continue
+            elif math.dist(q, center) > max(0, radius - body):
+                reject('zone_destination')
+                continue
+            endpoint_risk = risk(q)
+            midpoint_risk = risk([(q[i] + p[i]) * 0.5 for i in range(2)]) if distance > 12 else endpoint_risk
+            risk_cost = (endpoint_risk * 0.75 + midpoint_risk * 0.25) * (1 + missing)
+            exits = sum((w.walk_clear([*q, ground], [q[0] + dx * 8, q[1] + dy * 8, w.ground(q[0] + dx * 8, q[1] + dy * 8)], body, height) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))))
+            trap_cost = max(0, 2 - exits) * 4
+            sound_cost = 0
+            heading = unit([q[0] - p[0], q[1] - p[1]])
+            for bearing, weight, heard_at in self.heard[-6:]:
+                sound_cost += max(0, heading[0] * math.cos(bearing) + heading[1] * math.sin(bearing)) * weight * max(0, 1 - (now - heard_at) / 3) * 8
+            reserve = max(25, me['max_energy'] * 0.3)
+            escape_cost = max(0, reserve - me['energy']) / max(1, reserve) * min(8, distance / 8)
+            score = candidate['reward'] / (1 + completion / 10) - distance * (0.1 if kind == 'explore' else 0.14)
+            score -= risk_cost + trap_cost + sound_cost + escape_cost
+            if kind == 'drop':
+                score -= 3 + candidate['dwell'] * 0.3
+            if kind == 'zone':
+                score -= distance * (0.1 if not me['in_zone'] else 0)
+            candidate['score'] = score
+            scored.append(candidate)
+        if scored:
+            best = max(scored, key=lambda item: item['score'])
+            old = next((item for item in scored if item['key'] == self.goal_key), None)
+            if not rotating and old is not None and (best['score'] < old['score'] + max(3, abs(old['score']) * 0.15)):
+                best = old
+            if best['key'] != self.goal_key:
+                self.goal_until = now + (8 if best['kind'] == 'explore' else 4)
+            self.goal_key = best['key']
+            self.goal_kind = best['kind']
+            result = best['q']
+        else:
+            self.goal_kind = 'zone' if rotating else 'recover' if self.recovering else 'hold'
+            self.goal_key = (self.goal_kind, 'fallback')
+            best = None
+            result = fallback
+        self.goal_decision = dict(kind=self.goal_kind, key=self.goal_key, utility=round(best['score'], 3) if best else None, checked=checked, rejected=rejected, budget_exhausted=exhausted)
+        return result
 
     def movement(self, obs, desired, threats, urgent, deadline):
         me = obs['self']

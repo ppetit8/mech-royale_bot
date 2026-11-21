@@ -1,0 +1,22 @@
+{
+  "startup_ms": 2462.1,
+  "replay": {
+    "count": 900,
+    "p50_ms": 0.777,
+    "p90_ms": 5.732,
+    "p99_ms": 10.718,
+    "max_ms": 14.019,
+    "over_50_ms": 0
+  },
+  "synthetic_load": {
+    "count": 200,
+    "p50_ms": 6.873,
+    "p90_ms": 12.11,
+    "p99_ms": 12.302,
+    "max_ms": 13.081,
+    "over_50_ms": 0
+  },
+  "peak_rss_mib": 25.7,
+  "schema_errors": [],
+  "astar_expansions": 792
+}

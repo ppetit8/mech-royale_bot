@@ -1,0 +1,19 @@
+{
+  "world.py_unchanged": true,
+  "combat.py_unchanged": true,
+  "mechfight.py_unchanged": true,
+  "Dockerfile_unchanged": true,
+  "methods_unchanged": {
+    "zone_goal": true,
+    "exposure": true,
+    "movement": true,
+    "pick_upgrade": true,
+    "act": true
+  },
+  "no_extra_methods": true,
+  "other_initialization_unchanged": true,
+  "generated_methods_match_source": true,
+  "standalone_reproducible": true,
+  "bot_sha256": "a0a1201168b510edd505cf784cb830326ce0aa2409fa999169973788e3050988",
+  "pass": true
+}

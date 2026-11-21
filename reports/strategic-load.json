@@ -1,0 +1,28 @@
+{
+  "timing": {
+    "count": 300,
+    "p50_ms": 13.115,
+    "p90_ms": 13.459,
+    "p99_ms": 13.747,
+    "max_ms": 14.415,
+    "over_50_ms": 0
+  },
+  "schema_errors": [],
+  "max_candidates_checked": 4,
+  "strategy_budget_exhausted_frames": 300,
+  "goal_kinds": {
+    "recover": 120,
+    "disengage": 40,
+    "zone": 60,
+    "drop": 80
+  },
+  "workload": {
+    "cubes": 192,
+    "pickups": 40,
+    "crates": 36,
+    "drops": 3,
+    "max_enemies": 15,
+    "max_projectiles": 40,
+    "strategy_runs_every_frame": true
+  }
+}

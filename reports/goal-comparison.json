@@ -1,0 +1,181 @@
+{
+  "note": "Hand-selected regression diagnostics; not a win rate, placement score, or unbiased strategy evaluation.",
+  "scenarios": [
+    {
+      "scenario": "safe_repair_drop",
+      "expected": "drop",
+      "observed": {
+        "V5": {
+          "choice": "recover",
+          "goal": [
+            -40,
+            0
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "drop",
+          "goal": [
+            -25,
+            0
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "own_capture_progress",
+      "expected": "drop",
+      "observed": {
+        "V5": {
+          "choice": "recover",
+          "goal": [
+            -71.81980515339464,
+            31.81980515339464
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "drop",
+          "goal": [
+            -40,
+            0
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "foreign_capture_clock",
+      "expected": "avoid_drop",
+      "observed": {
+        "V5": {
+          "choice": "drop",
+          "goal": [
+            -25,
+            0
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "explore",
+          "goal": [
+            10.376005369953106,
+            41.07624718698698
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "enclosed_drop",
+      "expected": "avoid_drop",
+      "observed": {
+        "V5": {
+          "choice": "drop",
+          "goal": [
+            0,
+            0
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "explore",
+          "goal": [
+            -37.223036956135985,
+            -64.94065349419432
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "loot_behind_safe_cover",
+      "expected": "cube",
+      "observed": {
+        "V5": {
+          "choice": "disengage",
+          "goal": [
+            -40,
+            0
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "cube",
+          "goal": [
+            -50,
+            0
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "tiny_loot_noise",
+      "expected": "retain",
+      "observed": {
+        "V5": {
+          "choice": "switch",
+          "goal": [
+            -20.5,
+            -1
+          ],
+          "expected_behavior": false
+        },
+        "V6": {
+          "choice": "retain",
+          "goal": [
+            -20,
+            -1
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "contestable_repair_drop",
+      "expected": "avoid_drop",
+      "observed": {
+        "V5": {
+          "choice": "recover",
+          "goal": [
+            -71.81980515339464,
+            31.81980515339464
+          ],
+          "expected_behavior": true
+        },
+        "V6": {
+          "choice": "recover",
+          "goal": [
+            -40,
+            0
+          ],
+          "expected_behavior": true
+        }
+      }
+    },
+    {
+      "scenario": "zone_emergency",
+      "expected": "zone",
+      "observed": {
+        "V5": {
+          "choice": "zone",
+          "goal": [
+            16.0,
+            0.0
+          ],
+          "expected_behavior": true
+        },
+        "V6": {
+          "choice": "zone",
+          "goal": [
+            16.0,
+            0.0
+          ],
+          "expected_behavior": true
+        }
+      }
+    }
+  ]
+}
