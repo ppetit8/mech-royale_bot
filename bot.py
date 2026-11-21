@@ -934,7 +934,7 @@ class Navigator:
             return self.boundary_direction(me, goal, now) if critical else [0, 0]
         return [goal[0] - p[0], goal[1] - p[1]]
 
-# Source: combat.py; SHA-256: 5cc4d07f0a4d4c0e9eca7333d7975e4dafa1a030ee40af00eb11f7c51cf11ff5
+# Source: combat.py; SHA-256: ce19419fcffc9df6f374cfc8240036e22aa7c15246e06404fbabb71eaa418bf3
 """Weapon solutions, slew-aware trigger control, and conservative engagement policy."""
 import math
 
@@ -1004,7 +1004,6 @@ class Combat:
         self.cfg, self.world = (cfg, world)
         self.target_id = None
         self.last_attacked = -math.inf
-        self.attackers = {}
 
     def decide(self, obs, recovering, urgent):
         me = obs['self']
@@ -1012,22 +1011,13 @@ class Combat:
         stats = me['stats']
         cfg = self.cfg
         origin = [p[0], p[1], p[2] + stats['muzzle_height']]
-        for event in obs['events']:
-            if event['type'] == 'damaged' and event.get('weapon') != 'zone':
-                self.last_attacked = obs['t']
-                if event.get('by') is not None:
-                    self.attackers[event['by']] = obs['t']
-        self.attackers = {actor: t for actor, t in self.attackers.items() if obs['t'] - t < 3}
         empty_gun = any((w and w['kind'] == 'gun' and (w.get('ammo', 0) <= 0) and (w.get('reload', 0) <= 0) for w in me['weapons']))
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
-        if not recovering and (not urgent):
+        if not recovering and (not urgent) and (not threats):
             enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates'] if math.dist(c['pos'][:2], p[:2]) < 70]
             enemies += [e for e in obs['mechs'] if e['kind'] == 'npc' and math.dist(e['pos'][:2], p[:2]) < 85 and (me['hp'] > 0.8 * me['max_hp'])]
         candidates = []
-        pressure = False
-        burst = max((w['stats'].get('damage', 0) * (3 if w['kind'] == 'gun' else 1) for w in me['weapons'] if w), default=0)
-        burst *= 1 + cfg['cubes']['damage_per_cube'] * min(me['cubes'], cfg['cubes']['stat_cap'])
         for enemy in enemies:
             radius, height = target_shape(enemy, cfg)
             center = enemy['pos'][:]
@@ -1037,22 +1027,13 @@ class Combat:
                 continue
             if not self.world.shot_clear(origin, center):
                 continue
-            if enemy['kind'] == 'mech':
-                attacker = enemy['id'] in self.attackers
-                pressure = pressure or d < 100 or attacker or enemy.get('charging', False)
-                if d > 140 and (not attacker) and (not enemy.get('charging')) and (enemy.get('hp', math.inf) > burst) and (obs['alive'] > 3):
-                    continue
-            elif pressure:
-                continue
             score = 100 / (d + 30) + (0.35 if enemy['id'] == self.target_id else 0)
             if enemy['kind'] == 'mech':
                 score += 4 + 3 * (1 - enemy.get('hp', cfg['mech']['hp']) / enemy.get('max_hp', cfg['mech']['hp']))
                 if enemy.get('charging'):
                     score += 1
-                if enemy['id'] in self.attackers:
-                    score += 1.5
             elif enemy['kind'] == 'crate':
-                score += 5
+                score += 1
             candidates.append((score, enemy, center, radius))
         if not candidates:
             self.target_id = None
@@ -1060,6 +1041,9 @@ class Combat:
         _, target, center, radius = max(candidates, key=lambda c: c[0])
         self.target_id = target['id']
         d = math.dist(origin, center)
+        recent_attack = any((e['type'] == 'damaged' and e.get('weapon') != 'zone' for e in obs['events']))
+        if recent_attack:
+            self.last_attacked = obs['t']
         recent_attack = obs['t'] - self.last_attacked < 1.2
         pursuer = target['kind'] == 'mech' and d < 60
         last_stand = obs['alive'] <= 3 or obs['zone']['radius'] < 45
@@ -1159,7 +1143,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: 509cc0053d5868a61ccd60903105ddc8168201d4be34fca7c7b4e79dbfc250d5
+# Source: strategy.py; SHA-256: b6544ffb444f187c5d6f60e245934358a3ad394c34ff8cf0ae1fc9e629104243
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1174,7 +1158,7 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-survivor-v4'
+    name = 'Aegis-v5-control'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1197,44 +1181,6 @@ class Bot:
         self.heard = []
         self.avoid_goals = []
         self.progress = None
-        self.pressure = None
-
-    def assess_pressure(self, obs, threats):
-        me = obs['self']
-        p = me['pos']
-        source = [p[0], p[1], p[2] + me['stats']['eye_height']]
-        for enemy in threats[:4]:
-            d = math.dist(p[:2], enemy['pos'][:2])
-            if d > 120:
-                continue
-            bearing = math.atan2(p[1] - enemy['pos'][1], p[0] - enemy['pos'][0])
-            hostile = d < 55 or enemy.get('charging') or abs(wrap(bearing - enemy['aim'][0])) < 0.6 or (obs['t'] - self.last_damage < 1.2)
-            target = enemy['pos'][:]
-            target[2] += self.cfg['mech']['height'] * (1 + self.cfg['cubes']['size_per_cube'] * enemy.get('cubes', 0)) * 0.5
-            if hostile and self.world.shot_clear(source, target):
-                return enemy
-        return None
-
-    def combat_direction(self, obs, desired):
-        """Escape short-range threats while keeping a controlled firing orbit."""
-        me = obs['self']
-        enemy = self.pressure
-        away = unit([me['pos'][0] - enemy['pos'][0], me['pos'][1] - enemy['pos'][1]])
-        distance = math.dist(me['pos'][:2], enemy['pos'][:2])
-        held = [w for w in me['weapons'] if w]
-        lightning = next((w for w in held if w['kind'] == 'lightning'), None)
-        if lightning and me['energy'] > 35 and ('mortar' not in enemy.get('weapons', [])):
-            preferred = lightning['stats']['range'] - 9
-        elif any((w['kind'] == 'laser' for w in held)):
-            preferred = 110
-        else:
-            preferred = 85
-        if 'lightning' in enemy.get('weapons', []) and lightning is None:
-            preferred = max(preferred, self.cfg['weapons']['lightning']['range'] + 25)
-        radial = max(0, min(1.5, (preferred - distance) / 25))
-        tangent = [-away[1] * self.side, away[0] * self.side]
-        route = unit(desired)
-        return unit([route[i] * 0.3 + away[i] * radial + tangent[i] * 0.8 for i in range(2)])
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -1320,8 +1266,7 @@ class Bot:
             if math.dist(q[:2], center) > safe_r:
                 continue
             danger = sum((max(0, 80 - math.dist(q[:2], e['pos'][:2])) / 12 for e in threats))
-            useful_weapon = kind == 'weapon' and obj['kind'] not in held and (empty or ('mortar' in held and obj['kind'] in ('laser', 'lightning')))
-            value = 85 if kind == 'cube' else 125 if useful_weapon else 0
+            value = 85 if kind == 'cube' else 125 if kind == 'weapon' and empty and (obj['kind'] not in held) else 0
             if kind == 'crate' and (not threats) and (me['cubes'] < 10):
                 value = 35
             score = value / (d + 18) - danger
@@ -1343,10 +1288,6 @@ class Bot:
             return best[1]
         if self.goal is not None and now < self.goal_until and (math.dist(p[:2], self.goal) > 6) and (math.dist(self.goal, center) <= safe_r):
             return self.goal
-        if not threats and now - self.last_damage > 3:
-            self.goal_kind = 'hold'
-            self.goal_until = now + 2
-            return p[:2]
         for _ in range(12):
             angle = self.rng.uniform(-math.pi, math.pi)
             q = [p[0] + 65 * math.cos(angle), p[1] + 65 * math.sin(angle)]
@@ -1457,7 +1398,6 @@ class Bot:
         if me['hp'] >= me['max_hp'] * 0.93:
             self.recovering = False
         threats = sorted((e for e in obs['mechs'] if e['kind'] == 'mech'), key=lambda e: math.dist(p[:2], e['pos'][:2]))
-        self.pressure = self.assess_pressure(obs, threats)
         center, r = future_zone(obs['zone'], now, now + 12)
         urgent = not me['in_zone'] or math.dist(p[:2], center) > max(0, r - min(12, r * 0.15))
         if self.nav.failed_goal is not None and self.goal_kind not in ('zone', 'recover', 'disengage'):
@@ -1470,11 +1410,9 @@ class Bot:
         self.mode = 'recover' if self.recovering else self.goal_kind
         critical = urgent or self.goal_kind in ('zone', 'recover', 'disengage')
         desired = self.nav.direction(me, self.goal, begin + 0.006, now=now, critical=critical)
-        if self.pressure is not None and (not urgent) and (not self.recovering) and (obs['zone']['radius'] > 45):
-            desired = self.combat_direction(obs, desired)
-        if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3 and (self.pressure is None):
+        if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3:
             desired = [0, 0]
-        if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2 and (self.pressure is None):
+        if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2:
             desired = [0, 0]
         move = self.movement(obs, desired, threats, urgent, begin + 0.016)
         self.last_move = move
@@ -1487,8 +1425,7 @@ class Bot:
             reload = any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.75) and (not w.get('reload', 0)) for w in me['weapons']))
         reserve = max(25, me['max_energy'] * 0.3)
         moving = math.hypot(*move) > 0.5
-        close_pressure = self.pressure is not None and math.dist(p[:2], self.pressure['pos'][:2]) < 42
-        boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)) or close_pressure)
+        boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)))
         jump = False
         progress_stalled = False
         if critical and math.dist(p[:2], self.goal) > 10:
@@ -1524,15 +1461,10 @@ class Bot:
         if obs.get('offer'):
             action['pick'] = self.pick_upgrade(obs)
         held = [w['kind'] for w in me['weapons'] if w]
-        near = [o for o in obs['pickups'] if o['kind'] not in held and math.dist(p[:2], o['pos'][:2]) < self.cfg['loot']['pickup_radius'] and (abs(p[2] - o['pos'][2]) <= 4)]
-        if near:
-            pickup = max(near, key=lambda o: {'laser': 3, 'lightning': 2, 'mortar': 1, 'gun': 0}[o['kind']])
-            if len(held) < 2:
-                action['take'] = pickup['id']
-            elif pickup['kind'] in ('laser', 'lightning'):
-                replace = next((i for i, w in enumerate(me['weapons']) if w and w['kind'] == 'mortar'), None)
-                if replace is not None:
-                    action.update(take=pickup['id'], drop=replace)
+        if len(held) < 2:
+            near = [o for o in obs['pickups'] if o['kind'] not in held and math.dist(p[:2], o['pos'][:2]) < self.cfg['loot']['pickup_radius'] and (abs(p[2] - o['pos'][2]) <= 4)]
+            if near:
+                action['take'] = max(near, key=lambda o: {'laser': 3, 'lightning': 2, 'mortar': 1, 'gun': 0}[o['kind']])['id']
         return action
 
 if __name__ == '__main__':

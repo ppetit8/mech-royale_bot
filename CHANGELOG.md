@@ -1,54 +1,25 @@
-# V4 candidate: evidence and score ledger
+# V5 control validation
 
-## Reported scores
+This candidate intentionally restores complete V3 behavior and changes only the
+display name and packaging. It is not a new strategy claimed to beat 3.46.
 
-| Upload | Score |
+| Evidence | Result |
 | --- | --- |
-| v1 | 2.50 |
-| v2 | 3.27 |
-| Latest bot-only V3 upload with older world.py | 3.46 |
-| Complete V3 | Unmeasured |
-| V4 | Unmeasured |
+| Regression tests | 41 passed |
+| AST policy definitions equivalent to V3 | 63 |
+| Fixed-clock replay actions equivalent to V3 | 300/300; 0 differing actions |
+| Official conformance | PASS; 300/300 on time; p50 0.8 ms; p99 9.2 ms; max 12.0 ms |
+| Wrong ticks / stale responses / bad lines | 0 / 0 / 0 |
+| Replay workload, 900 decisions | p99 7.272 ms; max 11.603 ms |
+| Synthetic workload, 200 decisions | p99 11.656 ms; max 12.082 ms |
+| Workload 50 ms overruns / schema errors | 0 / 0 |
+| Initialization | 1980.4 ms |
+| Peak benchmark RSS | 25.6 MiB |
 
-The reported leader is 5.7+. Repository commits and match-level logs are unknown.
-The local V3 bot / V2 world combination raises a navigator argument TypeError.
-V4 prevents that specific mismatch through one self-contained runtime.
+Timing checks ran pinned to one logical CPU on this host. Docker sandbox tests
+and an official score for this control are pending. The parity check used a
+fixed clock and is deliberately separate from performance measurements.
 
-## Final measured checks
-
-| Check | Result |
-| --- | --- |
-| Regression suite | 50 passed, including standalone and obsolete-module protocol tests |
-| Official conformance | 300/300 on time; p50 1.1 ms; p99 11.7 ms; max 14.0 ms |
-| Bad lines / wrong ticks / stale replies | 0 / 0 / 0 |
-| Replay, 900 decisions | p99 9.655 ms; max 13.23 ms |
-| Synthetic load, 200 decisions | p99 15.006 ms; max 15.099 ms |
-| Workload budget overruns / schema errors | 0 / 0 |
-| Initialization | 2512.9 ms |
-| Peak benchmark RSS | 25.5 MiB |
-
-Conformance and timing benchmarks ran pinned to one logical CPU on this host.
-Container CPU quota and Docker filesystem/network isolation were not available.
-
-## Six-second movement-only probe
-
-| Version | Minimum separation | Final separation | Boost energy spent |
-| --- | --- | --- | --- |
-| Complete V3 | 0.0 m | 0.0 m | 0 |
-| V4 | 29.42 m | 33.13 m | 74.8 |
-
-The probe includes a visible cube toward a constant-speed pursuing opponent on
-flat ground. It applies movement acceleration and energy drain/regeneration.
-There is no damage, weapon model, collision push-apart, zone pressure, map
-navigation, or opponent decision model. These values demonstrate movement policy
-in that constructed scenario, not a practice score, win probability, or measured
-combat survival. In particular, V3's zero separation is model contact.
-
-The 10 new test scenarios cover quiet holding, collecting visible cubes, retreat
-with an energy reserve, replacing a mortar, preserving a charging laser, farming
-past hidden tracked enemies, farming before a distant neutral target, prioritizing
-immediate hostiles, responding to a distant attacker, and isolated single-file
-protocol operation with obsolete modules present.
-
-Deploy bot.py and Dockerfile together. Preserve prior submissions and compare the
-next official score before drawing a conclusion about V4 strength.
+Current reported best: 3.46. Reported V4 score: 2.98. Scored commit IDs and
+match-level results have not been provided. Repository audit details and exact
+observed GitHub commits are in reports/repository_audit.json.

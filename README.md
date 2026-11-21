@@ -1,60 +1,49 @@
-# Aegis V4 — standalone runtime
+# Aegis V5 control — V3 policy, standalone runtime
+
+This is a rollback/control build after V4's reported score fell to 2.98. It
+restores the complete V3 decision policy and keeps the single-file packaging
+introduced in V4. The display name is Aegis-v5-control. There are no intentional
+new tactical improvements in this candidate.
 
 ## Deploy
 
-Replace **bot.py and Dockerfile** at the root of the existing GitHub repository,
-commit the update, then resubmit the repository URL on the Mech Royale track page.
-V4's bot.py is self-contained and imports only the Python standard library.
-Older world.py, combat.py or mechfight.py files cannot change this runtime.
-The Dockerfile copies only bot.py. No third-party dependencies are needed.
+Replace **bot.py and Dockerfile** in the existing GitHub repository, commit, and
+resubmit its repository URL. bot.py contains the entire runtime. Older companion
+modules beside it cannot affect the deployed behavior. Preserve the existing
+best-scoring submission and record the exact scored commit for each new run.
 
-## Source and build
+## What the repository audit established
 
-bot.py is readable generated Python. Its source modules are included for review:
+Repository: https://github.com/ppetit8/mech-royale_bot
 
-| Source | Role |
-| --- | --- |
-| mechfight.py | Unmodified official generated types and transport wrapper |
-| world.py | V3 geometry, ground navigation and mandatory-route fallback |
-| combat.py | V4 target choice, farming, defensive fire and weapon control |
-| strategy.py | V4 goals, threat assessment, kiting, recovery and pickups |
+- Current commit 09987a453e4a22cabc0172af7fd459c49363a113 contains the supplied V4
+  standalone runtime and a Dockerfile that copies and runs that bot.py.
+- Commit 57eb6150f2f3bf7395c25264c0317d9c43f55f7b contains both the compatible V3
+  bot and V3 world module. Their UI-visible source matches our preserved sources.
+- The precise submission commit IDs corresponding to user-reported scores are
+  still unknown. Thus the earlier claim that 3.46 probably represented idle
+  fallback was too strong. The supplied mixed V3-bot/V2-world combination does
+  fail locally, but the repository history includes a corrected compatible pair.
+- The user reported V4 at 2.98, below the prior reported best of 3.46. The score
+  alone does not isolate which V4 policy changes caused that regression.
 
-After editing a source module, rebuild the single runtime:
+The audit was read-only. No GitHub changes or track submissions were made by the
+assistant. Details and source consistency fingerprints are in reports/.
 
-```sh
-python3 tools/build_standalone.py
-```
+## Validation
 
-The builder flattens source ASTs, removes local imports and intermediate main
-entry points, adds the official wrapper as the runtime module, and writes one
-entry point. It preserves source hashes in bot.py. It does not compress or
-encode executable code. All runtime code is directly readable.
+- 41 regression tests pass, including a process-level exchange with deliberately
+  broken companion modules beside the standalone runtime.
+- The source ASTs of 63 functions/classes match complete V3, excluding the display
+  name. All 300 replay actions match V3 under a fixed decision clock.
+- Separate wall-clock conformance and benchmark results are in reports/.
 
-## V4 behavior
+The fixed clock in the parity test permits a deterministic comparison of bounded
+path search logic. It is not a latency measurement or proof that every action
+will match in real games; wall-time scheduling, runtime environment and match
+observations still vary.
 
-- Seek safe nearby cubes and useful weapons; hold position and scan when no
-  worthwhile objective exists, instead of making random footstep-producing patrols.
-- Farm an accessible crate when tracked enemies are behind solid cover, or when
-  a distant unengaged enemy poses no immediate pressure. Nearby hostiles, charging
-  enemies and recent attackers take priority.
-- Avoid initiating distant fights with healthy opponents. Recent attackers,
-  low-HP finishing opportunities and the last few survivors remain valid targets.
-- Blend route direction with deliberate strafing and separation from close
-  threats. Preferred spacing depends on held weapons. Keep the existing energy
-  reserve and use ground boost to open distance from very close pressure.
-- Replace a mortar with a nearby laser or lightning pickup while preserving the
-  gun. Do not drop a charging laser.
-- Preserve V3 zone forecasting, route retries, progress detection and bounded jets.
-
-These are candidate policies, not proven score improvements. V4 has no official
-practice score yet. Reported history: v1 2.50; v2 3.27; latest mixed upload 3.46.
-The user reported the leading score as 5.7+. No submitted commits or match-level
-records were provided. V4's standalone runtime prevents the companion-module
-mismatch found when only V3's bot.py was uploaded.
-
-## Validate locally
-
-Keep the official extracted kit at ../mechfight-kit, or pass --kit to the tools.
+With the official extracted kit alongside this directory:
 
 ```sh
 python3 -m unittest discover -s tests -v
@@ -62,47 +51,49 @@ python3 ../mechfight-kit/check/check.py -- python3 -u bot.py
 python3 tools/benchmark.py --output reports/local
 ```
 
-The tests include a process-level hello/observation/end exchange with bot.py alone,
-and with deliberately broken companion modules beside it. Both must return a
-full strategy action (move, aim and fire), not a tick-only idle fallback.
-
-On Linux, taskset -c 0 can pin a command and its child to one allowed logical CPU.
-Choose an allowed CPU if 0 is unavailable. This does not reproduce Docker quotas.
+Optional policy parity check requires a separate preserved complete V3 directory:
 
 ```sh
-docker build -t aegis-v4 .
-python3 ../mechfight-kit/check/check.py --map-dir /arena -- docker run --rm -i --network none --cpus 1 --memory 512m --pids-limit 128 --read-only --tmpfs /tmp:rw,size=64m --user 65534:65534 -v "$PWD/../mechfight-kit/arena:/arena:ro" aegis-v4
+python3 tools/check_parity.py --baseline ../bot-v3 --output reports/parity_local.json
 ```
 
-Docker is unavailable in this development environment, so image build and the
-exact scorer sandbox remain untested. The assistant has not published or
-submitted V4. Compare the next official result with the existing submissions.
-
-## Additional probes and limits
-
-The timing benchmark uses the official 300-observation recording (36.8 s) and
-synthetic observations with 15 enemies and 40 projectiles. These are workload
-and correctness measurements; observations do not react to actions.
-
-The optional pursuit probe isolates movement toward loot under a single pursuer:
+Readable source modules are included: strategy.py, combat.py, world.py and the
+unmodified official mechfight.py wrapper. After editing a source module:
 
 ```sh
-python3 tools/pursuit_probe.py --version ../bot-v3
-python3 tools/pursuit_probe.py --version .
+python3 tools/build_standalone.py
 ```
 
-It models six seconds on flat ground with acceleration and boost energy. It omits
-weapon damage, projectiles, terrain, authoritative sliding and body separation,
-so zero separation means model contact, not a legal overlapping server state.
-It is not a simulator for match score or combat success.
+The generated bot.py is readable Python and imports only the standard library.
+It includes source hashes and one entry point.
 
-Navigation geometry is unchanged from V3; its earlier ground-only campus result
-was 11/12 routes. This probe was not repeated for V4 because its navigation code
-and tested movement scorer are unchanged. Full strategy behavior differs and
-requires actual games. Global roof transition planning remains incomplete.
+## Docker check
 
-Official track and starter kit: https://www.joinbuilders.org/buildathon/tracks/builders
+```sh
+docker build -t aegis-control .
+python3 ../mechfight-kit/check/check.py --map-dir /arena -- docker run --rm -i --network none --cpus 1 --memory 512m --pids-limit 128 --read-only --tmpfs /tmp:rw,size=64m --user 65534:65534 -v "$PWD/../mechfight-kit/arena:/arena:ro" aegis-control
+```
 
-The original official wrapper is included unchanged as mechfight.py. The generated
-runtime contains its code together with our strategy. Project code and tests were
-developed with AI assistance. See LICENSE for the MIT license.
+Docker was unavailable here; the exact scorer sandbox remains unverified. Local
+CPU affinity is not equivalent to Docker's CPU quota. No new official score has
+been obtained for this control build.
+
+## Limits and next experiment
+
+The official checker is a recorded observation stream, not a game simulator.
+Replay and synthetic tests establish protocol correctness, parity and workload
+cost, not placement strength. Global roof routing remains incomplete, and V3's
+previous ground probe completed 11/12 routes. Navigation was not changed or
+retested in this packaging-only control.
+
+Establish the control score first. Then change one policy per candidate, keeping
+commit-to-score records and any available match breakdown. V4's flat-ground
+pursuit probe did not predict the official regression, so it is insufficient as
+an optimization objective.
+
+The user reported a 5.7+ leading score. This remains a target, not a result of
+any of our local tests. Official track:
+https://www.joinbuilders.org/buildathon/tracks/builders
+
+Code was developed with AI assistance. mechfight.py is the unmodified official
+starter wrapper. See LICENSE for the MIT license.

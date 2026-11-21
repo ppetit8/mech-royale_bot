@@ -18,7 +18,7 @@ def future_zone(zone, now, future):
 
 
 class Bot:
-    name = 'Aegis-survivor-v4'
+    name = 'Aegis-v5-control'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -41,42 +41,6 @@ class Bot:
         self.heard = []
         self.avoid_goals = []
         self.progress = None
-        self.pressure = None
-
-    def assess_pressure(self, obs, threats):
-        me = obs['self']; p = me['pos']
-        source = [p[0], p[1], p[2] + me['stats']['eye_height']]
-        for enemy in threats[:4]:
-            d = math.dist(p[:2], enemy['pos'][:2])
-            if d > 120:
-                continue
-            bearing = math.atan2(p[1] - enemy['pos'][1], p[0] - enemy['pos'][0])
-            hostile = d < 55 or enemy.get('charging') or abs(wrap(bearing - enemy['aim'][0])) < .6 or obs['t'] - self.last_damage < 1.2
-            target = enemy['pos'][:]
-            target[2] += self.cfg['mech']['height'] * (1 + self.cfg['cubes']['size_per_cube'] * enemy.get('cubes', 0)) * .5
-            if hostile and self.world.shot_clear(source, target):
-                return enemy
-        return None
-
-    def combat_direction(self, obs, desired):
-        """Escape short-range threats while keeping a controlled firing orbit."""
-        me = obs['self']; enemy = self.pressure
-        away = unit([me['pos'][0] - enemy['pos'][0], me['pos'][1] - enemy['pos'][1]])
-        distance = math.dist(me['pos'][:2], enemy['pos'][:2])
-        held = [w for w in me['weapons'] if w]
-        lightning = next((w for w in held if w['kind'] == 'lightning'), None)
-        if lightning and me['energy'] > 35 and 'mortar' not in enemy.get('weapons', []):
-            preferred = lightning['stats']['range'] - 9
-        elif any(w['kind'] == 'laser' for w in held):
-            preferred = 110
-        else:
-            preferred = 85
-        if 'lightning' in enemy.get('weapons', []) and lightning is None:
-            preferred = max(preferred, self.cfg['weapons']['lightning']['range'] + 25)
-        radial = max(0, min(1.5, (preferred - distance) / 25))
-        tangent = [-away[1] * self.side, away[0] * self.side]
-        route = unit(desired)
-        return unit([route[i] * .3 + away[i] * radial + tangent[i] * .8 for i in range(2)])
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -155,8 +119,7 @@ class Bot:
             if math.dist(q[:2], center) > safe_r:
                 continue
             danger = sum(max(0, 80 - math.dist(q[:2], e['pos'][:2])) / 12 for e in threats)
-            useful_weapon = kind == 'weapon' and obj['kind'] not in held and (empty or ('mortar' in held and obj['kind'] in ('laser', 'lightning')))
-            value = 85 if kind == 'cube' else (125 if useful_weapon else 0)
+            value = 85 if kind == 'cube' else (125 if kind == 'weapon' and empty and obj['kind'] not in held else 0)
             if kind == 'crate' and not threats and me['cubes'] < 10:
                 value = 35
             score = value / (d + 18) - danger
@@ -177,12 +140,7 @@ class Bot:
             return best[1]
         if self.goal is not None and now < self.goal_until and math.dist(p[:2], self.goal) > 6 and math.dist(self.goal, center) <= safe_r:
             return self.goal
-        # With no worthwhile objective, stay quiet and scan. Random patrols
-        # create footsteps and unnecessary exposure without guaranteed loot.
-        if not threats and now - self.last_damage > 3:
-            self.goal_kind = 'hold'; self.goal_until = now + 2
-            return p[:2]
-        # A short relocation remains available when tracked threats are nearby.
+        # Explore around current safe position rather than rushing the crowded center.
         for _ in range(12):
             angle = self.rng.uniform(-math.pi, math.pi)
             q = [p[0] + 65 * math.cos(angle), p[1] + 65 * math.sin(angle)]
@@ -294,7 +252,6 @@ class Bot:
         if me['hp'] >= me['max_hp'] * .93:
             self.recovering = False
         threats = sorted((e for e in obs['mechs'] if e['kind'] == 'mech'), key=lambda e: math.dist(p[:2], e['pos'][:2]))
-        self.pressure = self.assess_pressure(obs, threats)
         center, r = future_zone(obs['zone'], now, now + 12)
         urgent = not me['in_zone'] or math.dist(p[:2], center) > max(0, r - min(12, r * .15))
         # Recompute expensive strategic choices at 2 Hz, but react to zone/damage immediately.
@@ -308,11 +265,9 @@ class Bot:
         self.mode = 'recover' if self.recovering else self.goal_kind
         critical = urgent or self.goal_kind in ('zone', 'recover', 'disengage')
         desired = self.nav.direction(me, self.goal, begin + .006, now=now, critical=critical)
-        if self.pressure is not None and not urgent and not self.recovering and obs['zone']['radius'] > 45:
-            desired = self.combat_direction(obs, desired)
-        if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3 and self.pressure is None:
+        if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3:
             desired = [0, 0]
-        if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2 and self.pressure is None:
+        if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2:
             desired = [0, 0]
         move = self.movement(obs, desired, threats, urgent, begin + .016)
         self.last_move = move
@@ -327,8 +282,7 @@ class Bot:
                          and not w.get('reload', 0) for w in me['weapons'])
         reserve = max(25, me['max_energy'] * .3)
         moving = math.hypot(*move) > .5
-        close_pressure = self.pressure is not None and math.dist(p[:2], self.pressure['pos'][:2]) < 42
-        boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)) or close_pressure)
+        boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)))
         jump = False
         progress_stalled = False
         if critical and math.dist(p[:2], self.goal) > 10:
@@ -364,17 +318,12 @@ class Bot:
         if obs.get('offer'):
             action['pick'] = self.pick_upgrade(obs)
         held = [w['kind'] for w in me['weapons'] if w]
-        near = [o for o in obs['pickups'] if o['kind'] not in held
-                and math.dist(p[:2], o['pos'][:2]) < self.cfg['loot']['pickup_radius']
-                and abs(p[2] - o['pos'][2]) <= 4]
-        if near:
-            pickup = max(near, key=lambda o: {'laser': 3, 'lightning': 2, 'mortar': 1, 'gun': 0}[o['kind']])
-            if len(held) < 2:
-                action['take'] = pickup['id']
-            elif pickup['kind'] in ('laser', 'lightning'):
-                replace = next((i for i, w in enumerate(me['weapons']) if w and w['kind'] == 'mortar'), None)
-                if replace is not None:
-                    action.update(take=pickup['id'], drop=replace)
+        if len(held) < 2:
+            near = [o for o in obs['pickups'] if o['kind'] not in held
+                    and math.dist(p[:2], o['pos'][:2]) < self.cfg['loot']['pickup_radius']
+                    and abs(p[2] - o['pos'][2]) <= 4]
+            if near:
+                action['take'] = max(near, key=lambda o: {'laser': 3, 'lightning': 2, 'mortar': 1, 'gun': 0}[o['kind']])['id']
         return action
 
 
