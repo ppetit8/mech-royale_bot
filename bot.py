@@ -1143,7 +1143,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: 24b1685f9c408c8fd771a7dbf6e50e76ac75cb86692eef74009ff6568d260984
+# Source: strategy.py; SHA-256: db12b3040e03b99fe290f55fce97854c69db41de5bf9653b31f77ec07dc7a757
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1158,7 +1158,7 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-v7'
+    name = 'Aegis-v8'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1171,6 +1171,7 @@ class Bot:
         self.goal_until = -1
         self.goal_kind = 'explore'
         self.last_damage = -100
+        self.last_mech_hit = (-math.inf, None)
         self.last_pos = None
         self.stuck = 0
         self.jet_until = -1
@@ -1463,6 +1464,59 @@ class Bot:
                 best = (score, move)
         return best[1]
 
+    def ground_boost_clear(self, me, move):
+        """Check the short ground segment before spending energy on a retreat."""
+        if not me['grounded']:
+            return False
+        p = me['pos']
+        stats = me['stats']
+        world = self.world
+        if abs(p[2] - world.ground(*p[:2])) >= 2:
+            return False
+        horizon = 0.35
+        accel = stats['ground_accel']
+        radius = stats['radius']
+        height = stats['height']
+        speed_scale = stats['charge_move_mult'] if any((weapon and weapon.get('charge', 0) > 0 for weapon in me['weapons'])) else 1
+        speed = stats['boost_speed'] * speed_scale
+        vx, vy = me['vel'][:2]
+        dx, dy = (move[0] * speed - vx, move[1] * speed - vy)
+        change = math.hypot(dx, dy)
+        ramp = min(horizon, change / accel) if accel > 0 else 0.0
+        ax = dx * accel / change if ramp else 0.0
+        ay = dy * accel / change if ramp else 0.0
+        previous = p
+        for t in (horizon / 2, horizon):
+            applied = min(t, ramp)
+            integral = applied * (t - applied / 2)
+            x = p[0] + vx * t + ax * integral
+            y = p[1] + vy * t + ay * integral
+            point = [x, y, world.ground(x, y)]
+            if not world.walk_clear(previous, point, radius, height):
+                return False
+            previous = point
+        return True
+
+    def disengage_boost(self, me, move, threats, now, reserve):
+        """Use a brief burst only along an already chosen retreat."""
+        hit_at, attacker_id = self.last_mech_hit
+        if now - hit_at > 0.65 or me['energy'] <= reserve + 15:
+            return False
+        attacker = next((enemy for enemy in threats if enemy['id'] == attacker_id), None)
+        if attacker is None:
+            return False
+        p = me['pos']
+        offset = [attacker['pos'][i] - p[i] for i in range(2)]
+        distance = math.hypot(*offset)
+        if distance > 120 or sum((move[i] * offset[i] for i in range(2))) >= -0.25 * distance:
+            return False
+        for enemy in threats:
+            offset = [enemy['pos'][i] - p[i] for i in range(2)]
+            distance = math.hypot(*offset)
+            if distance < 45 and sum((move[i] * offset[i] for i in range(2))) > 0.2 * distance:
+                return False
+        return self.ground_boost_clear(me, move)
+
     def pick_upgrade(self, obs):
         ranks = {'servos': 100, 'nanites': 95, 'plating': 90, 'armor': 88, 'reactor': 80, 'gun_mag': 76, 'gun_velocity': 74, 'laser_charge': 73, 'laser_damage': 72, 'gun_damage': 70, 'lightning_range': 69, 'capacitor': 68, 'jets': 66, 'gun_rate': 65, 'gyros': 64, 'sensors': 58, 'lightning_efficiency': 56, 'mortar_reload': 53, 'mortar_velocity': 52, 'mortar_splash': 50, 'lightning_chain': 35, 'laser_pierce': 30}
         if obs['self']['hp'] < obs['self']['max_hp'] * 0.6:
@@ -1483,6 +1537,8 @@ class Bot:
         for e in obs['events']:
             if e['type'] == 'damaged' and e.get('weapon') != 'zone':
                 self.last_damage = now
+                if e.get('weapon') in ('gun', 'laser', 'lightning', 'mortar') and e.get('by') is not None:
+                    self.last_mech_hit = (now, e['by'])
         for key, kind in (('cubes', 'cube'), ('pickups', 'weapon'), ('crates', 'crate')):
             for obj in obs[key]:
                 self.loot[obj['id']] = (obj, now, kind)
@@ -1520,6 +1576,8 @@ class Bot:
         reserve = max(25, me['max_energy'] * 0.3)
         moving = math.hypot(*move) > 0.5
         boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)))
+        if not boost and moving and (self.goal_kind == 'disengage') and (not self.recovering):
+            boost = self.disengage_boost(me, move, threats, now, reserve)
         jump = False
         progress_stalled = False
         if critical and math.dist(p[:2], self.goal) > 10:
