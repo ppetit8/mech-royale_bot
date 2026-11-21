@@ -18,7 +18,7 @@ def future_zone(zone, now, future):
 
 
 class Bot:
-    name = 'Aegis-survivor-v2'
+    name = 'Aegis-survivor-v3'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -40,6 +40,30 @@ class Bot:
         self.mode = 'explore'
         self.heard = []
         self.avoid_goals = []
+        self.progress = None
+
+    def zone_goal(self, me, center, radius, preferred):
+        """Project rotations onto free ground inside the intended safe circle."""
+        w = self.world; body = me['stats']['radius']; height = me['stats']['height']
+        candidates = [preferred, center]
+        for i in range(8):
+            a = i * math.pi / 4
+            candidates.append([center[0] + radius * .65 * math.cos(a),
+                               center[1] + radius * .65 * math.sin(a)])
+        valid = []
+        for q in candidates:
+            n = w.nearest(q, body)
+            if n is None:
+                continue
+            xy = list(w.xy(n))
+            if math.dist(xy, center) <= radius and w.clear_at(*xy, w.ground(*xy), height) >= body + .4:
+                valid.append(xy)
+                # Usually one cheap projection is sufficient.
+                if q is preferred:
+                    return xy
+        if valid:
+            return min(valid, key=lambda q: math.dist(me['pos'][:2], q))
+        return list(preferred)
 
     def exposure(self, point, threats, height):
         risk = 0
@@ -68,7 +92,7 @@ class Bot:
             toward = unit([p[0] - center[0], p[1] - center[1]])
             goal = [center[0] + toward[0] * safe_r * .8, center[1] + toward[1] * safe_r * .8]
             self.goal_kind = 'zone'
-            return goal
+            return self.zone_goal(me, center, max(0, radius - me['stats']['radius']), goal)
         if self.recovering or len(threats) >= 2:
             candidates = [p[:2]]
             for distance in (20, 45):
@@ -239,7 +263,8 @@ class Bot:
         if self.goal is None or urgent or obs['tick'] % 10 == 0 or self.recovering != (self.mode == 'recover'):
             self.goal = self.strategic_goal(obs, threats, urgent)
         self.mode = 'recover' if self.recovering else self.goal_kind
-        desired = self.nav.direction(me, self.goal, begin + .006)
+        critical = urgent or self.goal_kind in ('zone', 'recover', 'disengage')
+        desired = self.nav.direction(me, self.goal, begin + .006, now=now, critical=critical)
         if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3:
             desired = [0, 0]
         if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2:
@@ -259,9 +284,29 @@ class Bot:
         moving = math.hypot(*move) > .5
         boost = moving and me['energy'] > reserve and (urgent or (self.recovering and bool(threats)))
         jump = False
-        trying_to_move = moving or (math.hypot(*desired) > .5 and urgent)
+        progress_stalled = False
+        if critical and math.dist(p[:2], self.goal) > 10:
+            distance = math.dist(p[:2], self.goal)
+            if self.progress is None or math.dist(self.progress['goal'], self.goal) > 8:
+                self.progress = {'goal': self.goal[:], 'best': distance, 'at': now}
+            elif distance < self.progress['best'] - 3:
+                self.progress['best'] = distance; self.progress['at'] = now
+            elif now - self.progress['at'] > 4:
+                # Motion in a loop is not progress. Replan and allow the same
+                # bounded jet escape used for a physically stationary mech.
+                progress_stalled = True
+                self.progress['at'] = now
+                if self.nav.follow:
+                    self.nav.follow['hand'] *= -1
+        else:
+            self.progress = None
+        # Planner/local-controller stops still count as stalls when the
+        # mandatory destination is far away. Intent is independent of output.
+        trying_to_move = moving or (critical and math.dist(p[:2], self.goal) > 6)
         if self.last_pos is not None and trying_to_move and me['grounded']:
             self.stuck = self.stuck + .1 if math.dist(p[:2], self.last_pos[:2]) < .15 else max(0, self.stuck - .2)
+        if progress_stalled:
+            self.stuck = max(self.stuck, 1.)
         self.last_pos = p[:]
         if self.stuck > .9:
             self.nav.path = []; self.nav.search = None

@@ -238,7 +238,7 @@ class World:
 
 
 class Navigator:
-    def __init__(self, world):
+    def __init__(self, world, max_nodes=8000):
         self.w = world
         self.path = []
         self.search = None
@@ -249,25 +249,77 @@ class Navigator:
         self.failed_goal = None
         self.projections = {}
         self.failures = {}
+        self.max_nodes = max_nodes
+        self.calls = 0
+        self.follow = None
 
-    def direction(self, me, goal, deadline):
+    def boundary_direction(self, me, goal, now):
+        """Bounded wall following for mandatory objectives when A* is unavailable.
+
+        This returns a continuously checked horizontal segment, not a claim
+        that a full route exists. The next observation still controls movement.
+        """
+        w = self.w; p = me['pos']; s = me['stats']
+        distance = math.dist(p[:2], goal[:2])
+        if distance < 1:
+            return [0, 0]
+        direct = math.atan2(goal[1] - p[1], goal[0] - p[0])
+        ground = abs(p[2] - w.ground(*p[:2])) < 2
+        def clear(angle, length=6):
+            q = [p[0] + length * math.cos(angle), p[1] + length * math.sin(angle)]
+            q.append(w.ground(*q) if ground else p[2])
+            return w.walk_clear(p, q, s['radius'], s['height'], ground)
+        state = self.follow
+        if state is None or math.dist(state['goal'], goal[:2]) > 15:
+            if clear(direct, min(10, distance)):
+                self.follow = None
+                return [math.cos(direct) * 10, math.sin(direct) * 10]
+            state = self.follow = dict(goal=list(goal[:2]), yaw=direct, hand=1,
+                                       hit=distance, best=distance, changed=now, active=False)
+        if distance < state['best'] - 2:
+            state['best'] = distance; state['changed'] = now
+        # Rejoin the destination bearing only after making genuine progress.
+        if clear(direct, min(10, distance)) and distance < state['hit'] - 3:
+            self.follow = None
+            return [math.cos(direct) * 10, math.sin(direct) * 10]
+        if now - state['changed'] > 5:
+            state['hand'] *= -1; state['changed'] = now
+        # Keep a chosen wall on one side: turn toward it, then sweep away
+        # until a complete 6 m cylinder sweep fits. At most 16 probes.
+        for i in range(16):
+            angle = state['yaw'] + state['hand'] * ((-math.pi / 2 if state['active'] else 0) + i * math.pi / 8)
+            if clear(angle):
+                state['yaw'] = angle; state['active'] = True
+                return [math.cos(angle) * 6, math.sin(angle) * 6]
+        return [0, 0]
+
+    def direction(self, me, goal, deadline, now=None, critical=False):
+        self.calls += 1
+        if now is None:
+            now = self.calls * .1
         w = self.w; p = me['pos']; radius = me['stats']['radius']; height = me['stats']['height']
         # Roof/air travel uses continuous geometry, never the ground grid.
         on_ground_map = abs(p[2] - w.ground(*p[:2])) < 2
         dest = [goal[0], goal[1], w.ground(*goal[:2])]
         if math.dist(p[:2], goal[:2]) < 35 and w.walk_clear(p, dest, radius, height, on_ground_map):
             self.path = []; self.search = None
+            self.failed_goal = None; self.follow = None
             return [goal[0] - p[0], goal[1] - p[1]]
         target = w.nearest(goal, radius)
         if target is None:
-            return [goal[0] - p[0], goal[1] - p[1]]
+            self.failed_goal = w.node(goal)
+            return self.boundary_direction(me, goal, now) if critical else [goal[0] - p[0], goal[1] - p[1]]
         requested = target
-        failure_key = (target, round(radius, 2))
-        if failure_key in self.failures:
-            self.failed_goal = requested
-            self.path = []; self.search = None
-            return [0, 0]
         start_node = w.nearest(p, radius)
+        component = w.components[start_node] if start_node is not None else -1
+        failure_key = (target, round(radius, 2), round(height, 2), component)
+        if failure_key in self.failures:
+            failure = self.failures[failure_key]
+            if now - failure['at'] < (2 if critical else 12) and math.dist(p[:2], failure['from']) < 20:
+                self.failed_goal = requested
+                self.path = []; self.search = None
+                return self.boundary_direction(me, goal, now) if critical else [0, 0]
+            del self.failures[failure_key]
         if start_node is not None and w.components[start_node] != w.components[target]:
             self.failed_goal = target
             key = (target, w.components[start_node], round(radius, 2))
@@ -278,7 +330,7 @@ class Navigator:
             target = self.projections[key]
         elif failure_key not in self.failures:
             self.failed_goal = None
-        if target != self.goal_node or abs(radius - self.radius) > .2:
+        if target != self.goal_node or abs(radius - self.radius) > .01:
             self.path = []; self.search = None; self.goal_node = target; self.radius = radius
         if not self.path and self.search is None:
             start = w.nearest(p, radius)
@@ -288,7 +340,7 @@ class Navigator:
             heap, costs, parent, start, closed = self.search
             tx, ty = w.xy(target)
             for iteration in range(600):
-                if not heap or time.perf_counter() >= deadline:
+                if not heap or time.perf_counter() >= deadline or len(closed) >= self.max_nodes:
                     break
                 _, n = heapq.heappop(heap)
                 if n in closed:
@@ -313,10 +365,14 @@ class Navigator:
                     if ox and oy and (w.clearance[n + ox] < radius + .4 or w.clearance[n + oy * w.nx] < radius + .4):
                         continue
                     distance = w.CELL * (math.sqrt(2) if ox and oy else 1)
-                    if abs(w.heights[m] - w.heights[n]) > distance * math.tan(math.radians(w.cfg['mech']['max_slope_deg'])):
+                    # The walking limit restricts ascent. Descents may fall
+                    # under gravity; treating every drop as an uphill wall can
+                    # incorrectly disconnect entire low-ground regions.
+                    if w.heights[m] - w.heights[n] > distance * math.tan(math.radians(w.cfg['mech']['max_slope_deg'])):
                         continue
                     if min(w.clearance[n], w.clearance[m]) < radius + distance * .5 + .2:
-                        key = (min(n, m), max(n, m), round(radius, 2), round(height, 2))
+                        # Stepping down and stepping up are different queries.
+                        key = (n, m, round(radius, 2), round(height, 2))
                         if key not in self.edges:
                             ax, ay = w.xy(n); bx, by = w.xy(m)
                             self.edges[key] = w.walk_clear([ax, ay, w.heights[n]], [bx, by, w.heights[m]], radius, height)
@@ -327,11 +383,13 @@ class Navigator:
                         costs[m] = cost; parent[m] = n
                         x, y = w.xy(m)
                         heapq.heappush(heap, (cost + math.hypot(x - tx, y - ty), m))
-            if self.search and (not heap or len(closed) >= 8000):
+            if self.search and (not heap or len(closed) >= self.max_nodes):
                 self.search = None
                 self.failed_goal = requested
                 closest = min(closed, key=lambda n: math.dist(w.xy(n), goal[:2]), default=start)
-                self.failures[failure_key] = closest
+                self.failures[failure_key] = {'at': now, 'from': list(p[:2]), 'node': closest}
+                if len(self.failures) > 128:
+                    del self.failures[next(iter(self.failures))]
                 partial = [closest]
                 while partial[-1] != start:
                     partial.append(parent[partial[-1]])
@@ -356,5 +414,5 @@ class Navigator:
                     return [x - p[0], y - p[1]]
             self.path = []
         if self.failed_goal == requested:
-            return [0, 0]
+            return self.boundary_direction(me, goal, now) if critical else [0, 0]
         return [goal[0] - p[0], goal[1] - p[1]]
