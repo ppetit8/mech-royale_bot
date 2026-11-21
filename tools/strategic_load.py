@@ -1,4 +1,4 @@
-"""Force strategic evaluation on every frame of a loot-heavy real-map workload.
+"""Force strategic evaluation on every frame, with landed drops and heavy loot.
 
 This measures decision cost and action validity, not combat or match outcomes.
 """
@@ -27,7 +27,22 @@ def run(kit, frames=300):
     spec = importlib.util.spec_from_file_location('checker',kit/'check/check.py')
     checker = importlib.util.module_from_spec(spec); spec.loader.exec_module(checker)
     schema = checker.Schema(kit/'mechfight.schema.json')
-    times=[]; errors=[]; checked=[]; exhausted=0; modes={}
+    times=[]; errors=[]; repair_checks=[]; repair_ms=[]; modes={}
+    retreat_checks=[]; retreat_ms=[]
+    original=bot.repair_drop_goal
+    def measured_repair(*args):
+        begin=time.perf_counter();result=original(*args)
+        repair_ms.append((time.perf_counter()-begin)*1000);repair_checks.append(result is not None)
+        return result
+    bot.repair_drop_goal=measured_repair
+    retreat=bot.disengage_boost
+    def measured_retreat(*args):
+        begin=time.perf_counter()
+        result=retreat(*args)
+        retreat_ms.append((time.perf_counter()-begin)*1000)
+        retreat_checks.append(result)
+        return result
+    bot.disengage_boost=measured_retreat
     for frame in range(frames):
         obs=copy.deepcopy(sample); obs['tick']=frame*10; obs['t']=frame*.1
         obs['self']['hp']=500 if frame%60<30 else 1400
@@ -45,7 +60,7 @@ def run(kit, frames=300):
         for i in range(3):
             q=[x+20+i*25,y+10];q.append(bot.world.ground(*q))
             obs['drops'].append(dict(id=20000+i,pos=q,radius=8,lands_in=i*5,capture_s=4,progress=0,holder=None))
-        obs['mechs']=[]; obs['projectiles']=[]
+        obs['mechs']=[]; obs['projectiles']=[]; obs['events']=[]
         if frame%60<40:
             for i in range(15):
                 a=i*math.tau/15;d=35+i*5
@@ -54,15 +69,19 @@ def run(kit, frames=300):
             for i in range(40):
                 a=i*math.tau/40
                 obs['projectiles'].append(dict(id=i,kind='gun',pos=[x+30*math.cos(a),y+30*math.sin(a),z+4],vel=[-150*math.cos(a),-150*math.sin(a),0]))
+            if frame%60>=30:
+                obs['events']=[dict(type='damaged',weapon='gun',amount=45,by=4,bearing=0)]
         if frame%50>=40:
             obs['self']['in_zone']=False
             obs['zone'].update(center=[x+50,y],radius=30,next_center=[x+50,y],next_radius=25,shrink_start=0,shrink_end=100)
         start=time.perf_counter();action=bot.act(obs);times.append((time.perf_counter()-start)*1000)
         errors.extend(schema.errors(action,'Action'));json.dumps(action,allow_nan=False)
-        checked.append(bot.goal_decision['checked']);exhausted+=bot.goal_decision['budget_exhausted']
+        
         modes[bot.goal_kind]=modes.get(bot.goal_kind,0)+1
-    return dict(timing=summary(times),schema_errors=errors[:20],max_candidates_checked=max(checked),
-                strategy_budget_exhausted_frames=exhausted,goal_kinds=modes,
+    return dict(timing=summary(times),schema_errors=errors[:20],repair_override_calls=len(repair_checks),repair_override_selected=sum(repair_checks),
+                repair_override_timing=summary(repair_ms),goal_kinds=modes,
+                retreat_checks=len(retreat_checks),retreat_boosts=sum(retreat_checks),
+                retreat_check_timing=summary(retreat_ms) if retreat_ms else None,
                 workload=dict(cubes=192,pickups=40,crates=36,drops=3,max_enemies=15,max_projectiles=40,
                               strategy_runs_every_frame=True))
 
@@ -74,4 +93,4 @@ if __name__=='__main__':
     args=ap.parse_args();result=run(args.kit)
     print(json.dumps(result,indent=2))
     if args.output: args.output.write_text(json.dumps(result,indent=2)+'\n')
-    raise SystemExit(bool(result['schema_errors'] or result['timing']['over_50_ms']))
+    raise SystemExit(bool(result['schema_errors'] or result['timing']['over_50_ms'] or not result['retreat_checks']))

@@ -1143,7 +1143,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: db12b3040e03b99fe290f55fce97854c69db41de5bf9653b31f77ec07dc7a757
+# Source: strategy.py; SHA-256: 07f1f43cb6d3d738a51c8cf11e7aad3a0ff12fe34745fe7f03bf4e3ed9f82cb9
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1158,7 +1158,7 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-v8'
+    name = 'Aegis-v10'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1182,6 +1182,7 @@ class Bot:
         self.heard = []
         self.avoid_goals = []
         self.progress = None
+        self.refuge_until = -1
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -1308,6 +1309,88 @@ class Bot:
                 best = (rank, q[:2])
         return best[1] if best is not None else None
 
+    def cover_route(self, obs, threats, center, safe_radius):
+        """Choose a short escape route by exposure on the route and at its end."""
+        me = obs['self']
+        p = me['pos']
+        stats = me['stats']
+        world = self.world
+        if not me['grounded'] or abs(p[2] - world.ground(*p[:2])) > 2:
+            return None
+        nearby = [enemy for enemy in threats[:4] if math.dist(p[:2], enemy['pos'][:2]) < 130]
+        sources = [[*e['pos'][:2], e['pos'][2] + self.cfg['mech']['muzzle_height']] for e in nearby]
+        if not sources:
+            return None
+        axis = unit([sources[0][0] - p[0], sources[0][1] - p[1]])
+        if any((sum((axis[i] * (source[i] - p[i]) for i in range(2))) < 0 for source in sources[1:])):
+            return None
+        deadline = time.perf_counter() + 0.003
+        projected = []
+        base = self.cfg['mech']
+        for enemy in nearby:
+            origin = enemy['pos']
+            x, y = (origin[i] + 0.85 * enemy['vel'][i] for i in range(2))
+            z = world.ground(x, y)
+            if math.dist(origin[:2], (x, y)) >= 2 and abs(origin[2] - world.ground(*origin[:2])) < 2 and world.walk_clear(origin, [x, y, z], base['radius'], base['height']):
+                projected.append([x, y, z + base['muzzle_height']])
+
+        def risk(point):
+            target = [point[0], point[1], point[2] + 0.55 * stats['height']]
+            danger = 0.0
+            for source in sources:
+                distance = math.dist(point[:2], source[:2])
+                danger += max(0.0, 30 - distance) / 18
+                if world.shot_clear(source, target):
+                    danger += 75 / (25 + distance)
+            return danger
+
+        def future_risk(point):
+            target = [point[0], point[1], point[2] + 0.55 * stats['height']]
+            return sum((55 / (25 + math.dist(point[:2], source[:2])) for source in projected if world.shot_clear(source, target)))
+        current_risk = risk(p)
+        if current_risk < 0.08:
+            return None
+        heading = math.atan2(p[1] - sources[0][1], p[0] - sources[0][0])
+        old_goal = self.goal if self.goal_kind in ('recover', 'disengage') else None
+        options = []
+        if old_goal is not None and obs['t'] < self.refuge_until:
+            options.append(old_goal)
+        for distance in (16.0, 32.0, 48.0):
+            for delta in (0, 0.785, -0.785, 1.57, -1.57, 2.35, -2.35, math.pi):
+                yaw = heading + delta
+                options.append([p[0] + distance * math.cos(yaw), p[1] + distance * math.sin(yaw)])
+        best = None
+        for q in options:
+            if time.perf_counter() >= deadline:
+                break
+            distance = math.dist(p[:2], q[:2])
+            if distance < 4 or math.dist(q[:2], center) > safe_radius:
+                continue
+            destination = [*q[:2], world.ground(*q[:2])]
+            if not world.walk_clear(p, destination, stats['radius'], stats['height']):
+                continue
+            end_risk = risk(destination)
+            if end_risk >= current_risk * 0.82:
+                continue
+            midpoint = [(p[i] + destination[i]) / 2 for i in range(2)]
+            mid_risk = risk([*midpoint, world.ground(*midpoint)])
+            if mid_risk > current_risk * 1.18 + 0.1:
+                continue
+            travel_seconds = distance / max(1.0, stats['walk_speed'])
+            transit = (0.25 * current_risk + 0.5 * mid_risk + 0.25 * end_risk) * travel_seconds
+            score = transit + 4 * end_risk + 0.18 * travel_seconds
+            if projected:
+                score += 3 * future_risk(destination)
+            if q is old_goal and obs['t'] < self.refuge_until:
+                score *= 0.82
+            if best is None or score < best[0]:
+                best = (score, q)
+        if best is None:
+            return None
+        if best[1] is not old_goal:
+            self.refuge_until = obs['t'] + 1.5
+        return best[1]
+
     def strategic_goal(self, obs, threats, urgent):
         me = obs['self']
         p = me['pos']
@@ -1333,6 +1416,12 @@ class Bot:
             if repair is not None:
                 self.goal_kind = 'drop'
                 return repair
+        recent_hit = now - self.last_mech_hit[0] < 1.5
+        if self.recovering or (recent_hit and len(threats) >= 2):
+            route = self.cover_route(obs, threats, center, safe_r)
+            if route is not None:
+                self.goal_kind = 'recover' if self.recovering else 'disengage'
+                return route
         if self.recovering or len(threats) >= 2:
             candidates = [p[:2]]
             for distance in (20, 45):

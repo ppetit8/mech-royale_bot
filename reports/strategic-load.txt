@@ -1,20 +1,38 @@
 {
   "timing": {
     "count": 300,
-    "p50_ms": 13.115,
-    "p90_ms": 13.459,
-    "p99_ms": 13.747,
-    "max_ms": 14.415,
+    "p50_ms": 10.278,
+    "p90_ms": 10.538,
+    "p99_ms": 10.872,
+    "max_ms": 10.969,
     "over_50_ms": 0
   },
   "schema_errors": [],
-  "max_candidates_checked": 4,
-  "strategy_budget_exhausted_frames": 300,
+  "repair_override_calls": 120,
+  "repair_override_selected": 0,
+  "repair_override_timing": {
+    "count": 120,
+    "p50_ms": 0.031,
+    "p90_ms": 0.042,
+    "p99_ms": 0.049,
+    "max_ms": 0.065,
+    "over_50_ms": 0
+  },
   "goal_kinds": {
     "recover": 120,
     "disengage": 40,
     "zone": 60,
-    "drop": 80
+    "weapon": 80
+  },
+  "retreat_checks": 40,
+  "retreat_boosts": 0,
+  "retreat_check_timing": {
+    "count": 40,
+    "p50_ms": 0.003,
+    "p90_ms": 0.004,
+    "p99_ms": 0.006,
+    "max_ms": 0.006,
+    "over_50_ms": 0
   },
   "workload": {
     "cubes": 192,

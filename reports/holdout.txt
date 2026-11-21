@@ -1,0 +1,46 @@
+{
+  "first_seed": 93500,
+  "clock": "real",
+  "trials_per_policy": 96,
+  "elapsed_s": 17.34,
+  "source_sha256": "49dc12280856ac80eb4b05286048c4e792562aa046f207ecb7a58f487dad8f1d",
+  "metrics": {
+    "V8": {
+      "survivors": 33,
+      "mean_survival_s": 9.256,
+      "mean_hp": 244.7,
+      "mean_damage_in": 941.7,
+      "mean_damage_out": 564.4,
+      "mean_zone_damage": 2.8,
+      "maximum_decision_ms": 5.799,
+      "late_decisions": 0
+    },
+    "V10": {
+      "survivors": 35,
+      "mean_survival_s": 9.608,
+      "mean_hp": 251.8,
+      "mean_damage_in": 948.8,
+      "mean_damage_out": 555.0,
+      "mean_zone_damage": 2.8,
+      "maximum_decision_ms": 5.4,
+      "late_decisions": 0
+    }
+  },
+  "paired": {
+    "V10": {
+      "mean_survival_gain_s": 0.3521,
+      "bootstrap_95_interval_s": [
+        0.1083,
+        0.6302
+      ],
+      "survivor_gain": 2,
+      "family_survival_gain_s": {
+        "duel": 0.0,
+        "flank": 0.0292,
+        "pursuit": 1.3917,
+        "rotation": -0.0125
+      },
+      "late_commands": 0
+    }
+  }
+}
