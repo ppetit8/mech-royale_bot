@@ -499,7 +499,7 @@ def run(make_bot: Any) -> None:
             except Exception:
                 errors += 1
                 if errors <= 5 or errors % 100 == 0:
-                    log(f"act() failed at tick {latest['tick']} ({errors} so far):\n{traceback.format_exc()}")
+                    log(f'act() failed at tick {latest['tick']} ({errors} so far):\n{traceback.format_exc()}')
                 action = dict(last)
         action['tick'] = latest['tick']
         d = draw.take()
@@ -508,7 +508,7 @@ def run(make_bot: Any) -> None:
         try:
             _send(action)
         except (TypeError, ValueError):
-            log(f"unserializable action at tick {latest['tick']}:\n{traceback.format_exc()}")
+            log(f'unserializable action at tick {latest['tick']}:\n{traceback.format_exc()}')
             _send({'tick': latest['tick'], **last})
 
 # Source: world.py; SHA-256: dbb13c99b61d454872d0163305a1550819dc2975d876de8bae89a87483fd6bd0
@@ -1140,7 +1140,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: b299012797ad1b0767d777e2f227981a83963feb3260ae4fe9a101804695c0ff
+# Source: strategy.py; SHA-256: 1cfa9cee3ccd27345096fde5aa43344d0e285bda6173c695f64c2bd569e2b1c8
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1155,7 +1155,14 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-v11q'
+    name = 'Aegis-v12'
+    cover_mode = 'cover'
+    rear_guard_seconds = 0.0
+    retreat_charge_seconds = 0.0
+    recovery_enter_hp = 0.65
+    shelter_hold_seconds = 2.8
+    pursuit_recovery_hp = 0.78
+    migration_buffer_s = 12.0
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1169,6 +1176,7 @@ class Bot:
         self.goal_kind = 'explore'
         self.last_damage = -100
         self.last_mech_hit = (-math.inf, None)
+        self.last_hit_bearing = None
         self.last_pos = None
         self.stuck = 0
         self.jet_until = -1
@@ -1319,9 +1327,10 @@ class Bot:
         sources = [[*e['pos'][:2], e['pos'][2] + self.cfg['mech']['muzzle_height']] for e in nearby]
         if not sources:
             return None
-        axis = unit([sources[0][0] - p[0], sources[0][1] - p[1]])
-        if any((sum((axis[i] * (source[i] - p[i]) for i in range(2))) < 0 for source in sources[1:])):
-            return None
+        if self.cover_mode == 'aligned':
+            axis = unit([sources[0][0] - p[0], sources[0][1] - p[1]])
+            if any((sum((axis[i] * (source[i] - p[i]) for i in range(2))) < 0 for source in sources[1:])):
+                return None
         deadline = time.perf_counter() + 0.003
         projected = []
         base = self.cfg['mech']
@@ -1455,7 +1464,7 @@ class Bot:
         next_c = zone['next_center']
         next_r = zone['next_radius']
         dist_next = max(0, math.dist(p[:2], next_c) - next_r + 20)
-        migrate = urgent or dist_next / walk * 1.7 + 20 > zone['shrink_end'] - now
+        migrate = urgent or dist_next / walk * 1.7 + self.migration_buffer_s > zone['shrink_end'] - now
         if migrate:
             center, radius = (next_c, next_r)
         margin = min(25, radius * 0.2)
@@ -1470,6 +1479,9 @@ class Bot:
             if repair is not None:
                 self.goal_kind = 'drop'
                 return repair
+            if self.shelter_hold_seconds and now - self.last_mech_hit[0] < self.shelter_hold_seconds and threats and (min((math.dist(p[:2], enemy['pos'][:2]) for enemy in threats)) > 35) and (self.exposure(p, threats, me['stats']['height']) == 0):
+                self.goal_kind = 'recover'
+                return p[:2]
         recent_hit = now - self.last_mech_hit[0] < 1.5
         if self.recovering or (recent_hit and len(threats) >= 2):
             route = self.cover_route(obs, threats, center, safe_r)
@@ -1666,17 +1678,28 @@ class Bot:
                 self.last_damage = now
                 if e.get('weapon') in ('gun', 'laser', 'lightning', 'mortar') and e.get('by') is not None:
                     self.last_mech_hit = (now, e['by'])
+                    self.last_hit_bearing = e.get('bearing')
         for key, kind in (('cubes', 'cube'), ('pickups', 'weapon'), ('crates', 'crate')):
             for obj in obs[key]:
                 self.loot[obj['id']] = (obj, now, kind)
         self.loot = {i: item for i, item in self.loot.items() if now - item[1] < 18 and (not (math.dist(item[0]['pos'][:2], p[:2]) < 4 and item[1] < now - 0.5))}
-        if me['hp'] < me['max_hp'] * 0.65:
+        if me['hp'] < me['max_hp'] * self.recovery_enter_hp:
             self.recovering = True
         if me['hp'] >= me['max_hp'] * 0.93:
             self.recovering = False
         threats = sorted((e for e in obs['mechs'] if e['kind'] == 'mech'), key=lambda e: math.dist(p[:2], e['pos'][:2]))
         center, r = future_zone(obs['zone'], now, now + 12)
         urgent = not me['in_zone'] or math.dist(p[:2], center) > max(0, r - min(12, r * 0.15))
+        if self.pursuit_recovery_hp and (not self.recovering) and (not urgent) and (now - self.last_mech_hit[0] < 1.1) and (len(threats) >= 2) and (me['hp'] < self.pursuit_recovery_hp * me['max_hp']):
+            closing = 0
+            for enemy in threats[:4]:
+                offset = [p[i] - enemy['pos'][i] for i in range(2)]
+                distance = math.hypot(*offset)
+                if distance:
+                    speed_toward_us = sum((enemy['vel'][i] * (offset[i] / distance) for i in range(2)))
+                    if distance <= 100 and speed_toward_us >= 3.5:
+                        closing += 1
+            self.recovering = closing >= 2
         if self.nav.failed_goal is not None and self.goal_kind not in ('zone', 'recover', 'disengage'):
             if self.goal is not None:
                 self.avoid_goals.append(self.goal[:])

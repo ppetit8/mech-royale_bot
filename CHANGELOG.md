@@ -1,5 +1,3 @@
-# V10
+# V12
 
-- Add a bounded cover route planner with predicted endpoint exposure.
-- Use V8 route selection when nearby threats are spread across opposite sides.
-- Verify the final candidate with a 96-scenario comparison, 86 regressions, and the starter-kit protocol checker.
+Pursuit-aware survival candidate: enters recovery while two approaching tracked enemies apply pressure, holds exposed positions less aggressively, uses cover escapes across threat directions, and begins next-zone migration 8 seconds earlier than V11.

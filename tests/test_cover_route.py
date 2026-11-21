@@ -41,6 +41,7 @@ class CoverRouteTests(unittest.TestCase):
 
     def test_opposite_side_threat_keeps_baseline_escape_policy(self):
         self.foes.append(dict(enemy((25,0,0)), id=6))
+        self.bot.cover_mode = 'aligned'
         self.assertIsNone(self.route())
 
     def test_urgent_zone_takes_precedence(self):

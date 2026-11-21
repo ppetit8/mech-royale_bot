@@ -81,11 +81,7 @@ class Combat:
                         and w.get('reload', 0) <= 0 for w in me['weapons'])
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
-        if not recovering and not urgent and not threats:
-            enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates']
-                        if math.dist(c['pos'][:2], p[:2]) < 70]
-            enemies += [e for e in obs['mechs'] if e['kind'] == 'npc'
-                        and math.dist(e['pos'][:2], p[:2]) < 85 and me['hp'] > .8 * me['max_hp']]
+        # Quiet policy: never shoot crates or NPCs. Gunfire is audible at 320 m+.
         candidates = []
         for enemy in enemies:
             radius, height = target_shape(enemy, cfg)
@@ -116,11 +112,11 @@ class Combat:
                             for e in obs['events'])
         if recent_attack:
             self.last_attacked = obs['t']
-        recent_attack = obs['t'] - self.last_attacked < 1.2
-        pursuer = target['kind'] == 'mech' and d < 60
+        recent_attack = obs['t'] - self.last_attacked < 2.0
+        pursuer = target['kind'] == 'mech' and d < 22
         last_stand = obs['alive'] <= 3 or obs['zone']['radius'] < 45
         counterfire = target['kind'] == 'mech' and (recent_attack or pursuer or last_stand)
-        if (recovering or urgent) and not counterfire:
+        if not counterfire:
             yaw = math.atan2(center[1] - p[1], center[0] - p[0])
             return [yaw, 0.], [False, False], empty_gun, target
         weapons = me['weapons']; chosen = None
