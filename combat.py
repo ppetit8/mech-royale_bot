@@ -73,20 +73,30 @@ class Combat:
         self.cfg, self.world = cfg, world
         self.target_id = None
         self.last_attacked = -math.inf
+        self.attackers = {}
 
     def decide(self, obs, recovering, urgent):
         me = obs['self']; p = me['pos']; stats = me['stats']; cfg = self.cfg
         origin = [p[0], p[1], p[2] + stats['muzzle_height']]
+        for event in obs['events']:
+            if event['type'] == 'damaged' and event.get('weapon') != 'zone':
+                self.last_attacked = obs['t']
+                if event.get('by') is not None:
+                    self.attackers[event['by']] = obs['t']
+        self.attackers = {actor: t for actor, t in self.attackers.items() if obs['t'] - t < 3}
         empty_gun = any(w and w['kind'] == 'gun' and w.get('ammo', 0) <= 0
                         and w.get('reload', 0) <= 0 for w in me['weapons'])
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
-        if not recovering and not urgent and not threats:
+        if not recovering and not urgent:
             enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates']
                         if math.dist(c['pos'][:2], p[:2]) < 70]
             enemies += [e for e in obs['mechs'] if e['kind'] == 'npc'
                         and math.dist(e['pos'][:2], p[:2]) < 85 and me['hp'] > .8 * me['max_hp']]
-        candidates = []
+        candidates = []; pressure = False
+        burst = max((w['stats'].get('damage', 0) * (3 if w['kind'] == 'gun' else 1)
+                     for w in me['weapons'] if w), default=0)
+        burst *= 1 + cfg['cubes']['damage_per_cube'] * min(me['cubes'], cfg['cubes']['stat_cap'])
         for enemy in enemies:
             radius, height = target_shape(enemy, cfg)
             center = enemy['pos'][:]; center[2] += height * .5
@@ -96,13 +106,24 @@ class Combat:
                 continue
             if not self.world.shot_clear(origin, center):
                 continue  # Observations also contain actors tracked through cover.
+            if enemy['kind'] == 'mech':
+                attacker = enemy['id'] in self.attackers
+                pressure = pressure or d < 100 or attacker or enemy.get('charging', False)
+                # Avoid initiating a distant duel while loot is available.
+                # Attackers, exposed low-HP finishes and the endgame remain valid.
+                if d > 140 and not attacker and not enemy.get('charging') and enemy.get('hp', math.inf) > burst and obs['alive'] > 3:
+                    continue
+            elif pressure:
+                continue
             score = 100 / (d + 30) + (.35 if enemy['id'] == self.target_id else 0)
             if enemy['kind'] == 'mech':
                 score += 4 + 3 * (1 - enemy.get('hp', cfg['mech']['hp']) / enemy.get('max_hp', cfg['mech']['hp']))
                 if enemy.get('charging'):
                     score += 1
+                if enemy['id'] in self.attackers:
+                    score += 1.5
             elif enemy['kind'] == 'crate':
-                score += 1
+                score += 5
             candidates.append((score, enemy, center, radius))
         if not candidates:
             self.target_id = None
@@ -112,10 +133,6 @@ class Combat:
         d = math.dist(origin, center)
         # Recovery only helps if damage can actually stop. Return fire against
         # an immediate pursuer or a recent attacker while continuing to escape.
-        recent_attack = any(e['type'] == 'damaged' and e.get('weapon') != 'zone'
-                            for e in obs['events'])
-        if recent_attack:
-            self.last_attacked = obs['t']
         recent_attack = obs['t'] - self.last_attacked < 1.2
         pursuer = target['kind'] == 'mech' and d < 60
         last_stand = obs['alive'] <= 3 or obs['zone']['radius'] < 45
