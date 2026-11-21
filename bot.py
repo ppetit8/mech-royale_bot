@@ -499,7 +499,7 @@ def run(make_bot: Any) -> None:
             except Exception:
                 errors += 1
                 if errors <= 5 or errors % 100 == 0:
-                    log(f'act() failed at tick {latest['tick']} ({errors} so far):\n{traceback.format_exc()}')
+                    log(f"act() failed at tick {latest['tick']} ({errors} so far):\n{traceback.format_exc()}")
                 action = dict(last)
         action['tick'] = latest['tick']
         d = draw.take()
@@ -508,7 +508,7 @@ def run(make_bot: Any) -> None:
         try:
             _send(action)
         except (TypeError, ValueError):
-            log(f'unserializable action at tick {latest['tick']}:\n{traceback.format_exc()}')
+            log(f"unserializable action at tick {latest['tick']}:\n{traceback.format_exc()}")
             _send({'tick': latest['tick'], **last})
 
 # Source: world.py; SHA-256: dbb13c99b61d454872d0163305a1550819dc2975d876de8bae89a87483fd6bd0
@@ -934,7 +934,7 @@ class Navigator:
             return self.boundary_direction(me, goal, now) if critical else [0, 0]
         return [goal[0] - p[0], goal[1] - p[1]]
 
-# Source: combat.py; SHA-256: ce19419fcffc9df6f374cfc8240036e22aa7c15246e06404fbabb71eaa418bf3
+# Source: combat.py; SHA-256: ed25dc0c9f843deda9ee26d442677fef3b4a913ec7d8a332de783471242228cd
 """Weapon solutions, slew-aware trigger control, and conservative engagement policy."""
 import math
 
@@ -1014,9 +1014,6 @@ class Combat:
         empty_gun = any((w and w['kind'] == 'gun' and (w.get('ammo', 0) <= 0) and (w.get('reload', 0) <= 0) for w in me['weapons']))
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
-        if not recovering and (not urgent) and (not threats):
-            enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates'] if math.dist(c['pos'][:2], p[:2]) < 70]
-            enemies += [e for e in obs['mechs'] if e['kind'] == 'npc' and math.dist(e['pos'][:2], p[:2]) < 85 and (me['hp'] > 0.8 * me['max_hp'])]
         candidates = []
         for enemy in enemies:
             radius, height = target_shape(enemy, cfg)
@@ -1044,11 +1041,11 @@ class Combat:
         recent_attack = any((e['type'] == 'damaged' and e.get('weapon') != 'zone' for e in obs['events']))
         if recent_attack:
             self.last_attacked = obs['t']
-        recent_attack = obs['t'] - self.last_attacked < 1.2
-        pursuer = target['kind'] == 'mech' and d < 60
+        recent_attack = obs['t'] - self.last_attacked < 2.0
+        pursuer = target['kind'] == 'mech' and d < 22
         last_stand = obs['alive'] <= 3 or obs['zone']['radius'] < 45
         counterfire = target['kind'] == 'mech' and (recent_attack or pursuer or last_stand)
-        if (recovering or urgent) and (not counterfire):
+        if not counterfire:
             yaw = math.atan2(center[1] - p[1], center[0] - p[0])
             return ([yaw, 0.0], [False, False], empty_gun, target)
         weapons = me['weapons']
@@ -1143,7 +1140,7 @@ class Combat:
         reload = empty_gun or (any((w and w['kind'] == 'gun' and (w.get('ammo', 0) < w['stats']['mag'] * 0.4) and (not w.get('reload', 0)) for w in weapons)) and d > 120)
         return ([yaw, pitch], fire, reload, target)
 
-# Source: strategy.py; SHA-256: 07f1f43cb6d3d738a51c8cf11e7aad3a0ff12fe34745fe7f03bf4e3ed9f82cb9
+# Source: strategy.py; SHA-256: b299012797ad1b0767d777e2f227981a83963feb3260ae4fe9a101804695c0ff
 """Aegis: survival-first mechfight/1 bot. Standard library only."""
 import math
 import random
@@ -1158,7 +1155,7 @@ def future_zone(zone, now, future):
     return ([zone['center'][i] + (zone['next_center'][i] - zone['center'][i]) * fraction for i in range(2)], zone['radius'] + (zone['next_radius'] - zone['radius']) * fraction)
 
 class Bot:
-    name = 'Aegis-v10'
+    name = 'Aegis-v11q'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -1183,6 +1180,7 @@ class Bot:
         self.avoid_goals = []
         self.progress = None
         self.refuge_until = -1
+        self.hide = None
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -1391,6 +1389,62 @@ class Bot:
             self.refuge_until = obs['t'] + 1.5
         return best[1]
 
+    def hide_spot(self, obs, threats, center, safe_r):
+        """Pick an enclosed, low-exposure, quiet spot inside the safe zone and hold it."""
+        me = obs['self']
+        p = me['pos']
+        now = obs['t']
+        w = self.world
+        body = me['stats']['radius']
+        height = me['stats']['height']
+        deadline = time.perf_counter() + 0.004
+        rays = [(math.cos(i * math.pi / 6), math.sin(i * math.pi / 6)) for i in range(12)]
+
+        def score(q):
+            z = w.ground(*q) + height * 0.55
+            blocked = sum((1 for dx, dy in rays if not w.shot_clear([q[0], q[1], z], [q[0] + 40 * dx, q[1] + 40 * dy, z])))
+            s = 6 * blocked / 12 - 4 * self.exposure(q, threats, height)
+            for bearing, weight, heard_at in self.heard[-6:]:
+                dx, dy = (q[0] - p[0], q[1] - p[1])
+                n = math.hypot(dx, dy) or 1
+                s -= 6 * weight * max(0, (dx * math.cos(bearing) + dy * math.sin(bearing)) / n)
+            if safe_r > 150:
+                s -= 2 * max(0, 1 - math.dist(q, center) / (0.45 * safe_r))
+            return s - 0.02 * math.dist(q, p[:2])
+
+        def valid(q):
+            n = w.nearest(q, body)
+            if n is None or math.dist(q, center) > safe_r:
+                return None
+            xy = list(w.xy(n))
+            if math.dist(xy, center) > safe_r or any((math.dist(xy, bad) < 12 for bad in self.avoid_goals)):
+                return None
+            return xy if w.clear_at(*xy, w.ground(*xy), height) > body + 0.4 else None
+        cur = self.hide
+        if cur is not None and now < cur['until'] and (math.dist(cur['q'], center) <= safe_r) and (not threats) and (not self.heard):
+            return cur['q']
+        options = []
+        if cur is not None and math.dist(cur['q'], center) <= safe_r:
+            options.append(cur['q'])
+        for dist in (20, 45, 75):
+            for i in range(8):
+                a = i * math.pi / 4 + dist * 0.1
+                options.append([p[0] + dist * math.cos(a), p[1] + dist * math.sin(a)])
+        best = None
+        for q in options:
+            if time.perf_counter() > deadline:
+                break
+            xy = valid(q)
+            if xy is None:
+                continue
+            sc = score(xy) + (1.5 if cur is not None and q is cur['q'] else 0)
+            if best is None or sc > best[0]:
+                best = (sc, xy)
+        if best is None:
+            return center[:]
+        self.hide = {'q': best[1], 'until': now + 6}
+        return best[1]
+
     def strategic_goal(self, obs, threats, urgent):
         me = obs['self']
         p = me['pos']
@@ -1401,7 +1455,7 @@ class Bot:
         next_c = zone['next_center']
         next_r = zone['next_radius']
         dist_next = max(0, math.dist(p[:2], next_c) - next_r + 20)
-        migrate = urgent or dist_next / walk * 1.7 + 12 > zone['shrink_end'] - now
+        migrate = urgent or dist_next / walk * 1.7 + 20 > zone['shrink_end'] - now
         if migrate:
             center, radius = (next_c, next_r)
         margin = min(25, radius * 0.2)
@@ -1445,42 +1499,26 @@ class Bot:
             d = math.dist(q[:2], p[:2])
             if any((math.dist(q[:2], blocked) < 12 for blocked in self.avoid_goals)):
                 continue
-            if now - seen > 18 or d > 115 or abs(q[2] - self.world.ground(*q[:2])) > 4:
+            if now - seen > 18 or d > (50 if kind == 'cube' else 80) or abs(q[2] - self.world.ground(*q[:2])) > 4:
                 continue
             if math.dist(q[:2], center) > safe_r:
                 continue
             danger = sum((max(0, 80 - math.dist(q[:2], e['pos'][:2])) / 12 for e in threats))
             value = 85 if kind == 'cube' else 125 if kind == 'weapon' and empty and (obj['kind'] not in held) else 0
-            if kind == 'crate' and (not threats) and (me['cubes'] < 10):
-                value = 35
+            if kind == 'cube' and (threats or self.heard):
+                value = 0
             score = value / (d + 18) - danger
             if score > 0 and (best is None or score > best[0]):
                 if kind == 'crate':
                     away = unit([p[0] - q[0], p[1] - q[1]])
                     q = [q[0] + away[0] * 18, q[1] + away[1] * 18]
                 best = (score, q[:2], kind)
-        for drop in obs.get('drops', []):
-            q = drop['pos']
-            d = math.dist(q[:2], p[:2])
-            if d < 100 and drop['lands_in'] < d / walk + 5 and (math.dist(q[:2], center) < safe_r):
-                if all((math.dist(e['pos'][:2], q[:2]) > 100 for e in threats)):
-                    score = (200 if me['hp'] < me['max_hp'] * 0.8 else 100) / (d + 20)
-                    if best is None or score > best[0]:
-                        best = (score, q[:2], 'drop')
         if best:
             self.goal_kind = best[2]
             return best[1]
-        if self.goal is not None and now < self.goal_until and (math.dist(p[:2], self.goal) > 6) and (math.dist(self.goal, center) <= safe_r):
-            return self.goal
-        for _ in range(12):
-            angle = self.rng.uniform(-math.pi, math.pi)
-            q = [p[0] + 65 * math.cos(angle), p[1] + 65 * math.sin(angle)]
-            if math.dist(q, center) <= safe_r and self.world.nearest(q, me['stats']['radius']) is not None and all((math.dist(q, blocked) >= 12 for blocked in self.avoid_goals)):
-                self.goal_kind = 'explore'
-                self.goal_until = now + 10
-                return q
-        self.goal_kind = 'hold'
-        return center[:]
+        spot = self.hide_spot(obs, threats, center, safe_r)
+        self.goal_kind = 'hide'
+        return spot
 
     def movement(self, obs, desired, threats, urgent, deadline):
         me = obs['self']
@@ -1651,7 +1689,7 @@ class Bot:
         desired = self.nav.direction(me, self.goal, begin + 0.006, now=now, critical=critical)
         if self.goal_kind == 'drop' and math.dist(p[:2], self.goal) < 3:
             desired = [0, 0]
-        if self.goal_kind in ('recover', 'hold') and math.dist(p[:2], self.goal) < 2:
+        if self.goal_kind in ('recover', 'hold', 'hide') and math.dist(p[:2], self.goal) < 2:
             desired = [0, 0]
         move = self.movement(obs, desired, threats, urgent, begin + 0.016)
         self.last_move = move
