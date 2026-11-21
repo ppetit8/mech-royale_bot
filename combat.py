@@ -72,10 +72,13 @@ class Combat:
     def __init__(self, cfg, world):
         self.cfg, self.world = cfg, world
         self.target_id = None
+        self.last_attacked = -math.inf
 
     def decide(self, obs, recovering, urgent):
         me = obs['self']; p = me['pos']; stats = me['stats']; cfg = self.cfg
         origin = [p[0], p[1], p[2] + stats['muzzle_height']]
+        empty_gun = any(w and w['kind'] == 'gun' and w.get('ammo', 0) <= 0
+                        and w.get('reload', 0) <= 0 for w in me['weapons'])
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
         if not recovering and not urgent and not threats:
@@ -93,9 +96,9 @@ class Combat:
                 continue
             if not self.world.shot_clear(origin, center):
                 continue  # Observations also contain actors tracked through cover.
-            score = 100 / (d + 30) + (1 if enemy['id'] == self.target_id else 0)
+            score = 100 / (d + 30) + (.35 if enemy['id'] == self.target_id else 0)
             if enemy['kind'] == 'mech':
-                score += 4 + 2 * (1 - enemy.get('hp', 1400) / enemy.get('max_hp', 1400))
+                score += 4 + 3 * (1 - enemy.get('hp', cfg['mech']['hp']) / enemy.get('max_hp', cfg['mech']['hp']))
                 if enemy.get('charging'):
                     score += 1
             elif enemy['kind'] == 'crate':
@@ -103,18 +106,36 @@ class Combat:
             candidates.append((score, enemy, center, radius))
         if not candidates:
             self.target_id = None
-            return None, [False, False], False, None
+            return None, [False, False], empty_gun, None
         _, target, center, radius = max(candidates, key=lambda c: c[0])
         self.target_id = target['id']
         d = math.dist(origin, center)
-        # Preserve regeneration even when an enemy can be seen.
-        if recovering or urgent:
+        # Recovery only helps if damage can actually stop. Return fire against
+        # an immediate pursuer or a recent attacker while continuing to escape.
+        recent_attack = any(e['type'] == 'damaged' and e.get('weapon') != 'zone'
+                            for e in obs['events'])
+        if recent_attack:
+            self.last_attacked = obs['t']
+        recent_attack = obs['t'] - self.last_attacked < 1.2
+        pursuer = target['kind'] == 'mech' and d < 60
+        last_stand = obs['alive'] <= 3 or obs['zone']['radius'] < 45
+        counterfire = target['kind'] == 'mech' and (recent_attack or pursuer or last_stand)
+        if (recovering or urgent) and not counterfire:
             yaw = math.atan2(center[1] - p[1], center[0] - p[0])
-            return [yaw, 0.], [False, False], False, target
+            return [yaw, 0.], [False, False], empty_gun, target
         weapons = me['weapons']; chosen = None
         # Prefer a charged hitscan release; otherwise gun, then arc, then mortar.
-        ranked = sorted(enumerate(weapons), key=lambda iw: {'laser': 5 if iw[1] and iw[1].get('charge', 0) else 3,
-                         'gun': 4, 'lightning': 6 if d < 40 else 0, 'mortar': 2}.get(iw[1]['kind'], 0) if iw[1] else -1, reverse=True)
+        def priority(item):
+            _, w = item
+            if not w:
+                return -100
+            base = {'laser': 5 if w.get('charge', 0) else 3, 'gun': 4,
+                    'lightning': 6 if d < w['stats'].get('range', 0) - 2 else 0,
+                    'mortar': 2}[w['kind']]
+            if w.get('reload', 0) > 0 or w['cooldown'] > .1 or (w['kind'] == 'gun' and w.get('ammo', 0) <= 0):
+                base -= 20
+            return base
+        ranked = sorted(enumerate(weapons), key=priority, reverse=True)
         solutions = {}
         for slot, weapon in ranked:
             if not weapon or weapon.get('reload', 0) > 0:
@@ -149,7 +170,9 @@ class Combat:
                 if d > s['range'] - 1 or me['energy'] < s['energy'] + 25:
                     continue
             elif kind == 'laser':
-                if d > s['range'] or (me['hp'] < .55 * me['max_hp'] and not weapon.get('charge')):
+                # A new charge halves movement speed: avoid starting one while
+                # escaping. A charge already in progress still needs a safe release.
+                if d > s['range'] or ((recovering or urgent) and not weapon.get('charge')):
                     continue
             if kind != 'mortar':
                 yaw = math.atan2(point[1] - p[1], point[0] - p[0])
@@ -162,7 +185,7 @@ class Combat:
             if chosen is None:
                 chosen = slot
         if chosen is None:
-            return [math.atan2(center[1] - p[1], center[0] - p[0]), 0.], [False, False], False, target
+            return [math.atan2(center[1] - p[1], center[0] - p[0]), 0.], [False, False], empty_gun, target
         yaw, pitch, _, _ = solutions[chosen]
         fire = [False, False]
         for slot, solution in solutions.items():
@@ -188,6 +211,6 @@ class Combat:
             else:
                 fire[slot] = aligned and compatible
         # Opportunistic reload only away from an immediate engagement.
-        reload = any(w and w['kind'] == 'gun' and w.get('ammo', 0) < w['stats']['mag'] * .4
-                     and not w.get('reload', 0) for w in weapons) and d > 120
+        reload = empty_gun or (any(w and w['kind'] == 'gun' and w.get('ammo', 0) < w['stats']['mag'] * .4
+                     and not w.get('reload', 0) for w in weapons) and d > 120)
         return [yaw, pitch], fire, reload, target

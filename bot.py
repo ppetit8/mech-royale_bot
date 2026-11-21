@@ -18,7 +18,7 @@ def future_zone(zone, now, future):
 
 
 class Bot:
-    name = 'Aegis-survivor-v1'
+    name = 'Aegis-survivor-v2'
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -216,7 +216,7 @@ class Bot:
             if sound['kind'] in ('gun', 'laser', 'laser_charge', 'mortar', 'lightning') and sound['dist'] != 'far':
                 self.heard.append((sound['bearing'], .65 if sound['dist'] == 'near' else .2, now - sound['age']))
         for e in obs['events']:
-            if e['type'] == 'damaged':
+            if e['type'] == 'damaged' and e.get('weapon') != 'zone':
                 self.last_damage = now
         for key, kind in (('cubes', 'cube'), ('pickups', 'weapon'), ('crates', 'crate')):
             for obj in obs[key]:
