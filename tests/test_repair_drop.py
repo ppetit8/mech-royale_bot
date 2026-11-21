@@ -175,12 +175,16 @@ class RepairDropTests(unittest.TestCase):
         self.obs['self']['energy']=0;self.goal()
         self.obs['self']['energy']=100;self.obs['t']=5
         goal=self.goal()
-        self.assertEqual(self.bot.goal_kind,'hide')
+        self.assertEqual(self.bot.goal_kind,'explore')
+        self.assertGreater(math.dist(goal,self.obs['self']['pos'][:2]),20)
+        with patch('time.perf_counter',return_value=0):
+            action=self.bot.act(self.obs)
+        self.assertGreater(math.hypot(*action['move']),.5)
 
     def test_baseline_loot_detour_around_wall_is_preserved(self):
         self.geometry([wall()]);self.bot.recovering=False;self.obs['self']['hp']=1400
-        self.bot.loot[5000]=(dict(id=5000,pos=[8,0,0]),0,'cube')
-        self.assertEqual(self.goal(),[8,0]);self.assertEqual(self.bot.goal_kind,'cube')
+        self.bot.loot[5000]=(dict(id=5000,pos=[30,0,0]),0,'cube')
+        self.assertEqual(self.goal(),[30,0]);self.assertEqual(self.bot.goal_kind,'cube')
 
 
 if __name__=='__main__':

@@ -1,37 +1,28 @@
-# Aegis V12
+# Aegis V13
 
-V12 is a pursuit-aware survival candidate based on V11. It keeps quiet combat and hiding, adds recovery under sustained closing pressure, holds a sheltered position briefly, and migrates toward the next zone earlier.
+V13 is a practice candidate built from V8, the 3.56 baseline. It keeps the original 12-second migration buffer. Once safely inside the next circle, it can take a short detour for a visible cube, a weapon, or a landed supply drop before continuing its rotation.
 
-## What changed
-
-During recovery or sustained pressure from multiple tracked opponents, V12 considers up to 25 short ground routes. It checks geometry, exposure along the route, and whether a moving opponent may reopen an angle at the destination. It favors the current route briefly to reduce direction changes. The search has a 3 ms soft limit.
-
-After a recent hit below 78% HP, two tracked enemies must be within 100 m and closing at 3.5 m/s or more before V12 enters pursuit recovery. This avoids treating every low-health frame as a retreat while responding to genuine pressure.
-
-## Tests
+The detour needs a clear ground route and a destination inside the next circle’s safety margin. The bot declines while an emergency rotation is active, while a nearby opponent is tracked, or when a route has already failed. It considers up to six candidate routes within a soft 1.5 ms budget. Recovery still uses V8’s repair-drop checks. V8’s combat, crate farming, emergency navigation, boost and jet logic are the foundation of this build.
 
 | Check | Result |
 | --- | --- |
-| Fresh paired simulation | 96 scenarios per bot, 35 survivors for V12 versus 33 for V8 |
-| Mean simulated survival | V12 9.608 s and V8 9.256 s |
-| Fresh holdout | V12 +0.477 s versus V8 and 20 versus 16 survivors across 48 scenarios |
-| Gain by opponent | Pursuit +1.708 s, flank +0.200 s, duel 0.000 s, rotation 0.000 s |
-| Final real-clock simulation | 6.202 ms maximum decision time and zero late decisions for V12 |
-| Local official protocol checker | 300/300 replies on time, 11.4 ms maximum |
-| Heavy synthetic workload | 300 decisions, 10.97 ms maximum and zero overruns or schema errors |
-| Regression tests | 87 passed |
+| Reachable uncontested resources before shrink | V13 got all 18 versus 0 for V8. By scenario end, V8 got the 12 cubes and weapons, while V13 also captured all six drops. |
+| Targeted scenarios | 54 paired runs including blocked paths, elevated loot, enemies, and boundary cases. Zone damage matched in every pair. |
+| Forced zone entry | Both bots chose the zone goal first and averaged 10 HP of zone damage. |
+| Resource-free combat control | Both survived 30/96 and averaged 8.923 s alive. All paired survival times matched. |
+| Regression tests | 91 passed. |
+| Starter-kit protocol check | 300/300 on time, 12.2 ms maximum against 50 ms. |
+| Heavy action checks | 300 actions, zero schema errors, 12.35 ms maximum. |
 
-The model uses scripted opponents, simplified weapon and movement behavior, and 16-second scenarios. The fresh holdout gain is strong in pursuit scenarios, with no timing overruns. This is a local simulation, not an official placement score. Timing checks used one logical CPU on the local host.
+The resource simulation uses simple ground movement and scripted inputs. It measures the effect of reaching resources before the circle closes, without modeling weapon fights or long-term loot progression in those scenarios. The competition score is pending.
 
-## Run
+Put the root-level `bot.py` and `Dockerfile` into the existing practice submission repository. The runtime reports `Aegis-v13`.
 
-The archive includes the standalone runtime and Dockerfile. For a practice trial, put `bot.py` and `Dockerfile` at the root of the existing submission repository and submit its new commit. The runtime identifies itself as `Aegis-v12`.
-
-Run a local comparison or the regression tests from the extracted directory:
+From the extracted directory, reproduce the resource simulations and test suite with:
 
 ```sh
-python3 tools/compare_v8.py --seed 93500 --trials 96
+python3 tools/rotation_probe.py --output reports/rotation-local.json
 python3 -m unittest discover -s tests
 ```
 
-The archive includes the V8 comparison runtime and all fixture files. Detailed measurements are under reports/. To regenerate the standalone bot after editing source modules, run `python3 tools/build_standalone.py`.
+The V8 comparison runtime and fixtures are bundled. Edit the source modules and run `python3 tools/build_standalone.py` to regenerate the submission runtime. The measurements are under reports/.

@@ -238,13 +238,13 @@ class PolicyTests(unittest.TestCase):
         self.assertAlmostEqual(aim[0],0);self.assertFalse(any(fire))
 
     def test_aligned_gun_fires_with_lead(self):
-        o=observation();o['events']=[dict(type='damaged',weapon='gun',amount=45,bearing=0,by=5)];o['mechs']=[enemy()]
+        o=observation();o['mechs']=[enemy()]
         c=Combat(FIXTURE['hello']['config'],self.world)
         aim,_,_,_=c.decide(o,False,False);o['self']['aim']=aim
         self.assertTrue(c.decide(o,False,False)[1][0])
 
     def test_laser_charges_then_releases(self):
-        o=observation();o['events']=[dict(type='damaged',weapon='gun',amount=45,bearing=0,by=5)];o['mechs']=[enemy()]
+        o=observation();o['mechs']=[enemy()]
         o['self']['weapons']=[None,dict(kind='laser',cooldown=0,charge=0,stats=FIXTURE['hello']['config']['weapons']['laser'])]
         c=Combat(FIXTURE['hello']['config'],self.world)
         aim,fire,_,_=c.decide(o,False,False);self.assertTrue(fire[1])
@@ -252,7 +252,7 @@ class PolicyTests(unittest.TestCase):
         self.assertFalse(c.decide(o,False,False)[1][1])
 
     def test_laser_can_charge_while_gun_leads(self):
-        o=observation();o['events']=[dict(type='damaged',weapon='gun',amount=45,bearing=0,by=5)];o['mechs']=[enemy(vel=(0,15,0))]
+        o=observation();o['mechs']=[enemy(vel=(0,15,0))]
         o['self']['weapons'][1]=dict(kind='laser',cooldown=0,charge=0,stats=FIXTURE['hello']['config']['weapons']['laser'])
         self.assertTrue(Combat(FIXTURE['hello']['config'],self.world).decide(o,False,False)[1][1])
 
@@ -284,18 +284,10 @@ class PolicyTests(unittest.TestCase):
         self.assertFalse(any(c.decide(o,True,False)[1]))
 
     def test_recovery_returns_fire_against_close_pursuer(self):
-        o=observation();o['events']=[dict(type='damaged',weapon='gun',amount=45,bearing=0,by=5)];o['mechs']=[enemy((-10,0,0))];o['self']['hp']=500
+        o=observation();o['mechs']=[enemy((-10,0,0))];o['self']['hp']=500
         c=Combat(FIXTURE['hello']['config'],self.world)
         aim,_,_,_=c.decide(o,True,False);o['self']['aim']=aim
         self.assertTrue(c.decide(o,True,False)[1][0])
-
-    def test_pursuit_recovery_only_when_two_enemies_close_from_recent_hit(self):
-        o=observation();o['self']['hp']=1000
-        o['events']=[dict(type='damaged',weapon='gun',amount=45,bearing=0,by=5)]
-        o['mechs']=[enemy((-20,0,0),vel=(-12,0,0)),enemy((-25,10,0),vel=(-12,-4,0))]
-        b=self.bot();b.pursuit_recovery_hp=.78
-        b.act(o)
-        self.assertTrue(b.recovering)
 
     def test_ready_laser_aim_beats_cooling_gun_aim(self):
         o=observation();o['mechs']=[enemy(vel=(0,15,0))]
@@ -387,7 +379,7 @@ class PolicyTests(unittest.TestCase):
                     proc.stdin.write(json.dumps(message)+'\n');proc.stdin.flush()
                     self.assertTrue(select.select([proc.stdout],[],[],5)[0])
                     return json.loads(proc.stdout.readline())
-                self.assertEqual(exchange(h)['name'],'Aegis-v12')
+                self.assertEqual(exchange(h)['name'],'Aegis-v13')
                 action=exchange(observation())
                 self.assertTrue({'move','aim','fire'}.issubset(action))
                 proc.stdin.write(json.dumps(dict(type='end',place=1,kills=0))+'\n');proc.stdin.flush()

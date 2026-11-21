@@ -1,0 +1,203 @@
+{
+  "bot_sha256": "f1208fb9252eec85b9557ee723a4af89d7bbd447be9f5c35829d0ff4bce4232b",
+  "profile": {
+    "cube": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 2.063,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.553,
+        "late_decisions": 0,
+        "first_goals": {
+          "cube": 6
+        }
+      }
+    },
+    "weapon": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.759,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.334,
+        "late_decisions": 0,
+        "first_goals": {
+          "weapon": 6
+        }
+      }
+    },
+    "drop": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.674,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.342,
+        "late_decisions": 0,
+        "first_goals": {
+          "drop": 6
+        }
+      }
+    },
+    "blocked": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 4.752,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 4.695,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "outer-rim": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.62,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.703,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "outside-next": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.353,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.389,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "elevated": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.367,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 2.808,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "under-pressure": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.491,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.459,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "emergency": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 10.0,
+        "maximum_decision_ms": 0.967,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 10.0,
+        "maximum_decision_ms": 0.93,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,2829 @@
+{
+  "bot_sha256": "f1208fb9252eec85b9557ee723a4af89d7bbd447be9f5c35829d0ff4bce4232b",
+  "profile": {
+    "cube": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 2.063,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.553,
+        "late_decisions": 0,
+        "first_goals": {
+          "cube": 6
+        }
+      }
+    },
+    "weapon": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.759,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.334,
+        "late_decisions": 0,
+        "first_goals": {
+          "weapon": 6
+        }
+      }
+    },
+    "drop": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.674,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.342,
+        "late_decisions": 0,
+        "first_goals": {
+          "drop": 6
+        }
+      }
+    },
+    "blocked": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 4.752,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 4.695,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "outer-rim": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.62,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.703,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "outside-next": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.353,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.389,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "elevated": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.367,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 2.808,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "under-pressure": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.491,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 0,
+        "mean_zone_damage": 0.0,
+        "maximum_decision_ms": 0.459,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    },
+    "emergency": {
+      "V8": {
+        "picked_before_shrink": 0,
+        "picked_by_end": 6,
+        "mean_zone_damage": 10.0,
+        "maximum_decision_ms": 0.967,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      },
+      "V13": {
+        "picked_before_shrink": 6,
+        "picked_by_end": 6,
+        "mean_zone_damage": 10.0,
+        "maximum_decision_ms": 0.93,
+        "late_decisions": 0,
+        "first_goals": {
+          "zone": 6
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "scenario": "cube",
+      "seed": 2319,
+      "V8": {
+        "acquired_s": 10.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 2.063,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 1.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.553,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "cube",
+      "seed": 2320,
+      "V8": {
+        "acquired_s": 11.0,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 1.112,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.4,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 1.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.542,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "cube",
+      "seed": 2321,
+      "V8": {
+        "acquired_s": 11.0,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.604,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.4,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 1.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.345,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "cube",
+      "seed": 2322,
+      "V8": {
+        "acquired_s": 11.2,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.597,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.6,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.314,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "cube",
+      "seed": 2323,
+      "V8": {
+        "acquired_s": 10.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.578,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 1.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.331,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "cube",
+      "seed": 2324,
+      "V8": {
+        "acquired_s": 11.4,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.69,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.6,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "cube",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "cube"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.3,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3319,
+      "V8": {
+        "acquired_s": 11.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.651,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.6,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.322,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3320,
+      "V8": {
+        "acquired_s": 11.2,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.759,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.6,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.334,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3321,
+      "V8": {
+        "acquired_s": 11.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.597,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.7,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.31,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3322,
+      "V8": {
+        "acquired_s": 11.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.645,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.7,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.321,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3323,
+      "V8": {
+        "acquired_s": 11.5,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.7,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.315,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "weapon",
+      "seed": 3324,
+      "V8": {
+        "acquired_s": 11.3,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.592,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 1.7,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "weapon",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "weapon"
+          },
+          {
+            "t": 2.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.32,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4319,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.674,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 5.0,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.315,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4320,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.655,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 5.1,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.312,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4321,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.539,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 5.0,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.314,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4322,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.535,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 4.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.313,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4323,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.624,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 5.2,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.342,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "drop",
+      "seed": 4324,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "drop"
+          }
+        ],
+        "maximum_decision_ms": 0.318,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 4.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "drop",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "drop"
+          },
+          {
+            "t": 5.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.315,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5319,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.5,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.25,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.5,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.3,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5320,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 4.752,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 4.695,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5321,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.0,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.347,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.0,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.281,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5322,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 10.5,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.5,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 3.381,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 10.5,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.5,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 3.47,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5323,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.0,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.283,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.0,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          }
+        ],
+        "maximum_decision_ms": 3.281,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "blocked",
+      "seed": 5324,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 3.39,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.0,
+            "kind": "zone"
+          },
+          {
+            "t": 11.5,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "zone"
+          },
+          {
+            "t": 12.5,
+            "kind": "cube"
+          },
+          {
+            "t": 13.0,
+            "kind": "zone"
+          },
+          {
+            "t": 13.5,
+            "kind": "cube"
+          }
+        ],
+        "maximum_decision_ms": 3.39,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6319,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.548,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 3.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.624,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6320,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.588,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 3.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.676,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6321,
+      "V8": {
+        "acquired_s": 11.4,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.61,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 4.2,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.703,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6322,
+      "V8": {
+        "acquired_s": 11.4,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.62,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 4.2,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.698,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6323,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.551,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 3.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.629,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outer-rim",
+      "seed": 6324,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.6,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 3.9,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 1.0,
+            "kind": "cube"
+          },
+          {
+            "t": 4.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.68,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7319,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.353,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.341,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7320,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.318,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.347,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7321,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.344,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.342,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7322,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.33,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.33,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7323,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.323,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.339,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "outside-next",
+      "seed": 7324,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.322,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.389,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8319,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.367,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.353,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8320,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.335,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.346,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8321,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.344,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.348,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8322,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.323,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 2.808,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8323,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.333,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.327,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "elevated",
+      "seed": 8324,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.338,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.339,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9319,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.491,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.459,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9320,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.448,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.444,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9321,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.463,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.451,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9322,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.44,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.457,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9323,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.434,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.436,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "under-pressure",
+      "seed": 9324,
+      "V8": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.442,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": null,
+        "outside_s": 0.0,
+        "zone_damage": 0.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.436,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10319,
+      "V8": {
+        "acquired_s": 10.9,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.967,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 6.7,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 3.5,
+            "kind": "cube"
+          },
+          {
+            "t": 7.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.93,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10320,
+      "V8": {
+        "acquired_s": 11.3,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.844,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 7.3,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 4.0,
+            "kind": "cube"
+          },
+          {
+            "t": 7.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.847,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10321,
+      "V8": {
+        "acquired_s": 11.2,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.877,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 7.2,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 4.0,
+            "kind": "cube"
+          },
+          {
+            "t": 7.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.842,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10322,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.92,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 7.1,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 4.0,
+            "kind": "cube"
+          },
+          {
+            "t": 7.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.912,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10323,
+      "V8": {
+        "acquired_s": 11.1,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 12.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.853,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 7.1,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 4.0,
+            "kind": "cube"
+          },
+          {
+            "t": 7.5,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.857,
+        "late_decisions": 0
+      }
+    },
+    {
+      "scenario": "emergency",
+      "seed": 10324,
+      "V8": {
+        "acquired_s": 10.9,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "cube"
+          },
+          {
+            "t": 11.5,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.846,
+        "late_decisions": 0
+      },
+      "V13": {
+        "acquired_s": 6.7,
+        "outside_s": 0.5,
+        "zone_damage": 10.0,
+        "initial_goal": "zone",
+        "transitions": [
+          {
+            "t": 0.0,
+            "kind": "zone"
+          },
+          {
+            "t": 3.5,
+            "kind": "cube"
+          },
+          {
+            "t": 7.0,
+            "kind": "zone"
+          },
+          {
+            "t": 8.0,
+            "kind": "hold"
+          }
+        ],
+        "maximum_decision_ms": 0.853,
+        "late_decisions": 0
+      }
+    }
+  ]
+}

@@ -49,12 +49,6 @@ test_standalone_runtime_ignores_obsolete_modules (test_bot.PolicyTests.test_stan
 test_zero_radius_zone_produces_finite_action (test_bot.PolicyTests.test_zero_radius_zone_produces_finite_action) ... ok
 test_zone_prediction_uses_remaining_shrink (test_bot.PolicyTests.test_zone_prediction_uses_remaining_shrink) ... ok
 test_zone_rotation_goal_avoids_building_interior (test_bot.PolicyTests.test_zone_rotation_goal_avoids_building_interior) ... ok
-test_exhausted_budget_yields_baseline_fallback (test_cover_route.CoverRouteTests.test_exhausted_budget_yields_baseline_fallback) ... ok
-test_healthy_duel_does_not_use_retreat_planner (test_cover_route.CoverRouteTests.test_healthy_duel_does_not_use_retreat_planner) ... ok
-test_opposite_side_threat_keeps_baseline_escape_policy (test_cover_route.CoverRouteTests.test_opposite_side_threat_keeps_baseline_escape_policy) ... ok
-test_refuge_must_be_inside_future_margin (test_cover_route.CoverRouteTests.test_refuge_must_be_inside_future_margin) ... ok
-test_route_reaches_cover_around_edge_of_building (test_cover_route.CoverRouteTests.test_route_reaches_cover_around_edge_of_building) ... ok
-test_urgent_zone_takes_precedence (test_cover_route.CoverRouteTests.test_urgent_zone_takes_precedence) ... ok
 test_airborne_mech_retains_baseline_recovery (test_repair_drop.RepairDropTests.test_airborne_mech_retains_baseline_recovery) ... ok
 test_baseline_loot_detour_around_wall_is_preserved (test_repair_drop.RepairDropTests.test_baseline_loot_detour_around_wall_is_preserved) ... ok
 test_capture_at_center_holds_position_without_firing (test_repair_drop.RepairDropTests.test_capture_at_center_holds_position_without_firing) ... ok
@@ -84,8 +78,19 @@ test_safe_nearly_complete_capture_keeps_own_progress (test_repair_drop.RepairDro
 test_unlanded_drop_does_not_interrupt_recovery (test_repair_drop.RepairDropTests.test_unlanded_drop_does_not_interrupt_recovery) ... ok
 test_upgraded_regen_changes_time_comparison (test_repair_drop.RepairDropTests.test_upgraded_regen_changes_time_comparison) ... ok
 test_zone_emergency_keeps_v5_priority (test_repair_drop.RepairDropTests.test_zone_emergency_keeps_v5_priority) ... ok
+test_cube_inside_next_ring_remains_available (test_zone_opportunity.ZoneOpportunityTests.test_cube_inside_next_ring_remains_available) ... ok
+test_failed_goal_is_not_retried_as_opportunistic_loot (test_zone_opportunity.ZoneOpportunityTests.test_failed_goal_is_not_retried_as_opportunistic_loot) ... ok
+test_invalid_height_does_not_override_rotation (test_zone_opportunity.ZoneOpportunityTests.test_invalid_height_does_not_override_rotation) ... ok
+test_landed_drop_can_be_taken_instead_of_repositioning (test_zone_opportunity.ZoneOpportunityTests.test_landed_drop_can_be_taken_instead_of_repositioning) ... ok
+test_nearby_opponent_prevents_detour (test_zone_opportunity.ZoneOpportunityTests.test_nearby_opponent_prevents_detour) ... ok
+test_nearby_safe_crate_still_fireable (test_zone_opportunity.ZoneOpportunityTests.test_nearby_safe_crate_still_fireable) ... ok
+test_next_circle_boundary_bait_is_rejected (test_zone_opportunity.ZoneOpportunityTests.test_next_circle_boundary_bait_is_rejected) ... ok
+test_no_interest_at_cube_cap (test_zone_opportunity.ZoneOpportunityTests.test_no_interest_at_cube_cap) ... ok
+test_outside_or_urgent_takes_priority (test_zone_opportunity.ZoneOpportunityTests.test_outside_or_urgent_takes_priority) ... ok
+test_wall_cannot_turn_short_detour_into_slow_route (test_zone_opportunity.ZoneOpportunityTests.test_wall_cannot_turn_short_detour_into_slow_route) ... ok
+test_weapon_pickup_can_beat_safe_zone_move (test_zone_opportunity.ZoneOpportunityTests.test_weapon_pickup_can_beat_safe_zone_move) ... ok
 
 ----------------------------------------------------------------------
-Ran 86 tests in 1.294s
+Ran 91 tests in 1.050s
 
 OK

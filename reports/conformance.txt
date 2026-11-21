@@ -1,6 +1,6 @@
-bot: python3 -u work/mech/bot-v10/bot.py
-ready in 2987 ms: name 'Aegis-v10'
+bot: python3 -u work/mech/bot-v13/bot.py
+ready in 2082 ms: name 'Aegis-v13'
 observations: 300  answered in time: 300  missed the 50 ms budget: 0 (0 came late)
-answer time ms: p50 1.0  p90 5.6  p99 10.1  max 11.4  (this machine, not the 1-CPU match container)
+answer time ms: p50 0.8  p90 4.5  p99 9.0  max 12.2  (this machine, not the 1-CPU match container)
 answers to older queued observations (dropped): 0  wrong tick: 0  bad lines: 0  debug drawings: 0 (0 over the caps)
 PASS

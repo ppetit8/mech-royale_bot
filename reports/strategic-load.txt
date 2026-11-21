@@ -1,10 +1,10 @@
 {
   "timing": {
     "count": 300,
-    "p50_ms": 10.278,
-    "p90_ms": 10.538,
-    "p99_ms": 10.872,
-    "max_ms": 10.969,
+    "p50_ms": 11.726,
+    "p90_ms": 12.15,
+    "p99_ms": 12.307,
+    "max_ms": 12.349,
     "over_50_ms": 0
   },
   "schema_errors": [],
@@ -12,10 +12,10 @@
   "repair_override_selected": 0,
   "repair_override_timing": {
     "count": 120,
-    "p50_ms": 0.031,
-    "p90_ms": 0.042,
-    "p99_ms": 0.049,
-    "max_ms": 0.065,
+    "p50_ms": 0.025,
+    "p90_ms": 0.033,
+    "p99_ms": 0.044,
+    "max_ms": 0.056,
     "over_50_ms": 0
   },
   "goal_kinds": {
@@ -28,9 +28,9 @@
   "retreat_boosts": 0,
   "retreat_check_timing": {
     "count": 40,
-    "p50_ms": 0.003,
-    "p90_ms": 0.004,
-    "p99_ms": 0.006,
+    "p50_ms": 0.002,
+    "p90_ms": 0.003,
+    "p99_ms": 0.004,
     "max_ms": 0.006,
     "over_50_ms": 0
   },
