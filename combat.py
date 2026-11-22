@@ -74,18 +74,21 @@ class Combat:
         self.target_id = None
         self.last_attacked = -math.inf
 
-    def decide(self, obs, recovering, urgent):
+    def decide(self, obs, recovering, urgent, covered_crates=(), allow_uncontested_farm=True):
         me = obs['self']; p = me['pos']; stats = me['stats']; cfg = self.cfg
         origin = [p[0], p[1], p[2] + stats['muzzle_height']]
         empty_gun = any(w and w['kind'] == 'gun' and w.get('ammo', 0) <= 0
                         and w.get('reload', 0) <= 0 for w in me['weapons'])
         threats = [e for e in obs['mechs'] if e['kind'] == 'mech']
         enemies = threats[:]
-        if not recovering and not urgent and not threats:
+        if not recovering and not urgent and not threats and allow_uncontested_farm:
             enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates']
                         if math.dist(c['pos'][:2], p[:2]) < 70]
             enemies += [e for e in obs['mechs'] if e['kind'] == 'npc'
                         and math.dist(e['pos'][:2], p[:2]) < 85 and me['hp'] > .8 * me['max_hp']]
+        elif not recovering and not urgent and covered_crates:
+            enemies += [dict(c, kind='crate', vel=[0, 0, 0]) for c in obs['crates']
+                        if c['id'] in covered_crates]
         candidates = []
         for enemy in enemies:
             radius, height = target_shape(enemy, cfg)

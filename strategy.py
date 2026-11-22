@@ -18,7 +18,9 @@ def future_zone(zone, now, future):
 
 
 class Bot:
-    name = 'Aegis-v13'
+    name = 'Aegis-v14'
+    farm_under_cover = True
+    swap_mortar_for_laser = False
 
     def __init__(self, hello):
         self.cfg = hello['config']
@@ -42,6 +44,9 @@ class Bot:
         self.heard = []
         self.avoid_goals = []
         self.progress = None
+        self.covered_crates = ()
+        self.enemy_tracks = {}
+        self.farm_clear = True
 
     def zone_goal(self, me, center, radius, preferred):
         """Project rotations onto free ground inside the intended safe circle."""
@@ -161,62 +166,56 @@ class Bot:
                 best = rank, q[:2]
         return best[1] if best is not None else None
 
-    def safe_zone_opportunity(self, obs, threats, center, safe_radius):
-        """Take a short resource detour once safely inside the next circle."""
+    def update_enemy_tracks(self, threats, now, events):
+        """Retain last reported locations beyond the server's tracking window."""
+        defeated = {event['target'] for event in events if event['type'] == 'kill'}
+        self.enemy_tracks = {ident: (pos, stamp) for ident, (pos, stamp) in self.enemy_tracks.items()
+                             if now - stamp <= 10 and ident not in defeated}
+        for enemy in threats:
+            if enemy['id'] not in defeated:
+                self.enemy_tracks[enemy['id']] = (tuple(enemy['pos'][:2]), now)
+
+    def lost_enemy_near(self, p, threats, now):
+        tracked_now = {enemy['id'] for enemy in threats}
+        speed = self.cfg['mech']['boost_speed']
+        return any(ident not in tracked_now
+                   and math.dist(p[:2], last_pos) <= 65 + speed * (now - stamp)
+                   for ident, (last_pos, stamp) in self.enemy_tracks.items())
+
+    def farmable_crates(self, obs, threats):
+        """A distant tracked mech cannot veto a crate if solid cover blocks both angles."""
         me = obs['self']
         p = me['pos']
-        stats = me['stats']
-        world = self.world
-        if (safe_radius <= stats['radius'] or not me['in_zone'] or not me['grounded']
-                or math.dist(p[:2], center) > safe_radius):
-            return None
-        if any(math.dist(p[:2], enemy['pos'][:2]) < 110 for enemy in threats):
-            return None
-        if abs(p[2] - world.ground(*p[:2])) > 2:
-            return None
-
+        if not obs['crates'] or len(threats) != 1 or not me['in_zone'] or me['cubes'] >= 10:
+            return ()
+        now = obs['t']
+        if (now - self.last_damage < 2.5 or self.lost_enemy_near(p, threats, now)
+                or any(weight > .5 and now-stamp < 1 for _,weight,stamp in self.heard[-6:])):
+            return ()
+        enemy = threats[0]
+        if math.dist(enemy['pos'][:2], p[:2]) < 75:
+            return ()
+        config = self.cfg['mech']
+        scale = 1 + self.cfg['cubes']['size_per_cube'] * enemy.get('cubes', 0)
+        source = [*enemy['pos'][:2], enemy['pos'][2] + config['muzzle_height'] * scale]
+        target = [*p[:2], p[2] + me['stats']['height']*.55]
+        if self.world.shot_clear(source, target):
+            return ()
         deadline = time.perf_counter() + .0015
-        if self.recovering:
-            # The original repair test retains its own timing and enemy checks.
-            repair = self.repair_drop_goal(obs, threats)
-            if repair is not None and math.dist(repair, center) <= safe_radius:
-                return 'drop', repair
-            return None
-
-        held = {weapon['kind'] for weapon in me['weapons'] if weapon}
-        options = []
-
-        def offer(kind, obj, value, limit):
-            q = obj['pos']
-            distance = math.dist(q[:2], p[:2])
-            if distance <= limit and math.dist(q[:2], center) <= safe_radius:
-                options.append((value / (distance + 18), kind, obj['id'], q))
-
-        if me['cubes'] < 10:
-            for item in obs['cubes']:
-                offer('cube', item, 85, 42)
-        if len(held) < 2:
-            for item in obs['pickups']:
-                if item['kind'] not in held:
-                    offer('weapon', item, 125, 42)
-        for drop in obs.get('drops', []):
-            if drop['lands_in'] <= 0 and drop['holder'] in (None, me['id']):
-                if all(math.dist(enemy['pos'][:2], drop['pos'][:2]) > 125 for enemy in threats):
-                    offer('drop', drop, 200 if me['hp'] < me['max_hp'] * .8 else 100, 35)
-
-        for _, kind, _, q in sorted(options, reverse=True)[:6]:
+        closest = sorted(obs['crates'],key=lambda crate:math.dist(crate['pos'][:2],p[:2]))[:3]
+        choices = []
+        for crate in closest:
             if time.perf_counter() >= deadline:
                 break
-            if any(math.dist(q[:2], bad) < 12 for bad in self.avoid_goals):
+            q = crate['pos']
+            if math.dist(q[:2], p[:2]) > 34 or math.dist(q[:2], enemy['pos'][:2]) < 75:
                 continue
-            ground = world.ground(*q[:2])
-            if abs(q[2] - ground) > 4:
+            if abs(q[2]-self.world.ground(*q[:2])) > 3:
                 continue
-            if world.walk_clear(p, [q[0], q[1], ground], stats['radius'], stats['height']):
-                if time.perf_counter() < deadline:
-                    return kind, q[:2]
-                break
-        return None
+            crate_target = [*q[:2], q[2]+me['stats']['height']*.55]
+            if not self.world.shot_clear(source,crate_target):
+                choices.append(crate['id'])
+        return tuple(choices)
 
     def strategic_goal(self, obs, threats, urgent):
         me = obs['self']; p = me['pos']; now = obs['t']; zone = obs['zone']
@@ -230,11 +229,6 @@ class Bot:
         margin = min(25, radius * .2)
         safe_r = max(0, radius - margin)
         if migrate or math.dist(p[:2], center) > safe_r:
-            if migrate and not urgent:
-                detour = self.safe_zone_opportunity(obs, threats, center, safe_r)
-                if detour is not None:
-                    self.goal_kind, goal = detour
-                    return goal
             toward = unit([p[0] - center[0], p[1] - center[1]])
             goal = [center[0] + toward[0] * safe_r * .8, center[1] + toward[1] * safe_r * .8]
             self.goal_kind = 'zone'
@@ -271,7 +265,7 @@ class Bot:
                 continue
             danger = sum(max(0, 80 - math.dist(q[:2], e['pos'][:2])) / 12 for e in threats)
             value = 85 if kind == 'cube' else (125 if kind == 'weapon' and empty and obj['kind'] not in held else 0)
-            if kind == 'crate' and not threats and me['cubes'] < 10:
+            if kind == 'crate' and ((not threats and self.farm_clear) or obj['id'] in self.covered_crates) and me['cubes'] < 10:
                 value = 35
             score = value / (d + 18) - danger
             if score > 0 and (best is None or score > best[0]):
@@ -464,8 +458,13 @@ class Bot:
         if me['hp'] >= me['max_hp'] * .93:
             self.recovering = False
         threats = sorted((e for e in obs['mechs'] if e['kind'] == 'mech'), key=lambda e: math.dist(p[:2], e['pos'][:2]))
+        self.update_enemy_tracks(threats, now, obs['events'])
+        self.farm_clear = not self.farm_under_cover or not self.lost_enemy_near(p, threats, now)
         center, r = future_zone(obs['zone'], now, now + 12)
         urgent = not me['in_zone'] or math.dist(p[:2], center) > max(0, r - min(12, r * .15))
+        self.covered_crates = ()
+        if self.farm_under_cover and not urgent and not self.recovering:
+            self.covered_crates = self.farmable_crates(obs, threats)
         # Recompute expensive strategic choices at 2 Hz, but react to zone/damage immediately.
         if self.nav.failed_goal is not None and self.goal_kind not in ('zone', 'recover', 'disengage'):
             if self.goal is not None:
@@ -483,7 +482,8 @@ class Bot:
             desired = [0, 0]
         move = self.movement(obs, desired, threats, urgent, begin + .016)
         self.last_move = move
-        aim, fire, reload, target = self.combat.decide(obs, self.recovering, urgent)
+        aim, fire, reload, target = self.combat.decide(obs, self.recovering, urgent,
+                                                      self.covered_crates, self.farm_clear)
         if aim is None:
             # Face a recent attacker to avoid rear damage, otherwise scan at a bounded rate.
             damage = next((e for e in reversed(obs['events']) if e['type'] == 'damaged' and e.get('bearing') is not None), None)
@@ -538,6 +538,19 @@ class Bot:
                     and abs(p[2] - o['pos'][2]) <= 4]
             if near:
                 action['take'] = max(near, key=lambda o: {'laser': 3, 'lightning': 2, 'mortar': 1, 'gun': 0}[o['kind']])['id']
+        elif (self.swap_mortar_for_laser and not urgent and not self.recovering
+                and 'laser' not in held and 'mortar' in held and now - self.last_damage > 2.5
+                and all(math.dist(e['pos'][:2], p[:2]) > 75 for e in threats)
+                and not self.lost_enemy_near(p, threats, now)
+                and not any(weight > .5 and now-stamp < 1 for _,weight,stamp in self.heard[-6:])):
+            nearby_lasers = [item for item in obs['pickups'] if item['kind'] == 'laser'
+                             and math.dist(p[:2],item['pos'][:2]) < self.cfg['loot']['pickup_radius']
+                             and abs(p[2]-item['pos'][2]) <= 4]
+            if nearby_lasers:
+                slot = next(index for index, weapon in enumerate(me['weapons']) if weapon['kind'] == 'mortar')
+                if not fire[slot]:
+                    laser = min(nearby_lasers, key=lambda item:(math.dist(p,item['pos']),item['id']))
+                    action.update(take=laser['id'], drop=slot)
         return action
 
 

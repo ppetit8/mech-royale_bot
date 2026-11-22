@@ -379,7 +379,7 @@ class PolicyTests(unittest.TestCase):
                     proc.stdin.write(json.dumps(message)+'\n');proc.stdin.flush()
                     self.assertTrue(select.select([proc.stdout],[],[],5)[0])
                     return json.loads(proc.stdout.readline())
-                self.assertEqual(exchange(h)['name'],'Aegis-v13')
+                self.assertEqual(exchange(h)['name'],'Aegis-v14')
                 action=exchange(observation())
                 self.assertTrue({'move','aim','fire'}.issubset(action))
                 proc.stdin.write(json.dumps(dict(type='end',place=1,kills=0))+'\n');proc.stdin.flush()
